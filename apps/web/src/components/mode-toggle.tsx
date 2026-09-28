@@ -1,31 +1,35 @@
 "use client";
 
+import { Icons } from "@/components/icons";
 import { Button } from "@devshakya.me/ui/components/button";
+import { Kbd } from "@devshakya.me/ui/components/kbd";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@devshakya.me/ui/components/dropdown-menu";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import * as React from "react";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@devshakya.me/ui/components/tooltip";
+import { useThemeToggle } from "@/hooks/use-theme-toggle";
 
-export function ModeToggle() {
-  const { setTheme } = useTheme();
+export const ModeToggle = () => {
+  const { theme, toggleTheme } = useThemeToggle();
+
+  const handleToggle = () => {
+    toggleTheme();
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Toggle theme</span>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button variant="ghost" size="icon-sm" onClick={handleToggle} />
+        }
+      >
+        <Icons.theme />
+      </TooltipTrigger>
+      <TooltipContent>
+        Toggle Mode
+        <Kbd>D</Kbd>
+      </TooltipContent>
+    </Tooltip>
   );
-}
+};

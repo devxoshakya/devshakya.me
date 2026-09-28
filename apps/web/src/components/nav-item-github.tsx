@@ -1,0 +1,48 @@
+import { Icons } from "@/components/icons";
+import { AppLink } from "@/components/ui/app-link";
+import { Button } from "@devshakya.me/ui/components/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@devshakya.me/ui/components/tooltip";
+import { LINK } from "@/constants/links";
+import { getStargazerCount } from "@/lib/github/stargazers";
+
+const NavItemGitHub = async () => {
+  const stargazerCount = await getStargazerCount();
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            nativeButton={false}
+            render={
+              <AppLink
+                href={LINK.GITHUB_REPO}
+                target="_blank"
+                rel="noreferrer"
+                eventProperties={{
+                  context: "github_link",
+                  link_type: "github",
+                  title: "site repo",
+                  url: LINK.GITHUB_REPO,
+                }}
+              />
+            }
+          >
+            <Icons.github />
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom">
+        {new Intl.NumberFormat("en-US").format(stargazerCount)} stars
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+export { NavItemGitHub };
