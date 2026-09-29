@@ -1,85 +1,54 @@
 import { LINK } from "@/constants/links";
+
 import type { Contact } from "@/types/contacts";
 
 export const CONTACTS = [
   {
     icon: "github",
     link: {
-      display: "@Aniket-508",
+      display: "@devxoshakya",
       url: LINK.GITHUB,
     },
     title: "GitHub",
   },
   {
-    icon: "youtube",
-    link: {
-      display: "@alaymanguy",
-      url: LINK.YOUTUBE,
-    },
-    title: "YouTube",
-  },
-  {
-    icon: "bluesky",
-    link: {
-      display: "@alaymanguy.bsky.social",
-      url: LINK.BLUESKY,
-    },
-    title: "Bluesky",
-  },
-  {
-    icon: "dailydev",
-    link: {
-      display: "@aniket508",
-      url: LINK.DAILYDEV,
-    },
-    title: "daily.dev",
-  },
-  {
     icon: "linkedin",
     link: {
-      display: "@aniketpawar508",
+      display: "@devshakya",
       url: LINK.LINKEDIN,
     },
     title: "LinkedIn",
   },
   {
-    icon: "x",
+    icon: "leetcode",
     link: {
-      display: "@alaymanguy",
-      url: LINK.TWITTER,
+      display: "@devxoshakya",
+      url: LINK.LEETCODE,
     },
-    title: "Twitter",
-  },
-  {
-    icon: "topmate",
-    link: {
-      display: "@aniket_pawar",
-      url: LINK.TOPMATE,
-    },
-    title: "Topmate",
-  },
-  {
-    icon: "peerlist",
-    link: {
-      display: "@aniket_pawar",
-      url: LINK.PEERLIST,
-    },
-    title: "Peerlist",
-  },
-  {
-    icon: "discord",
-    link: {
-      display: "@aniketpawar",
-      url: LINK.DISCORD,
-    },
-    title: "Discord",
+    title: "LeetCode",
   },
   {
     icon: "telegram",
     link: {
-      display: "@Aniket_508",
+      display: "@devshakya",
       url: LINK.TELEGRAM,
     },
     title: "Telegram",
+  },
+  {
+    icon: "gfg",
+    link: {
+      display: "@devxoshakya",
+      url: LINK.GFG,
+    },
+    title: "GeeksforGeeks",
+  },
+  {
+    icon: "instagram",
+    link: {
+      display: "@devshakya",
+      url: LINK.INSTAGRAM,
+    },
+    title: "Instagram",
   },
 ] as const satisfies readonly Contact[];

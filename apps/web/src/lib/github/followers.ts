@@ -3,11 +3,11 @@ import { unstable_cache } from "next/cache";
 
 import { GITHUB } from "@/constants/links";
 
-export const getStargazerCount = unstable_cache(
+export const getFollowerCount = unstable_cache(
   async () => {
     try {
       const response = await fetch(
-        `https://api.github.com/repos/${GITHUB.user}/${GITHUB.repo}`,
+        `https://api.github.com/users/${GITHUB.user}`,
         {
           headers: {
             Accept: "application/vnd.github+json",
@@ -20,12 +20,15 @@ export const getStargazerCount = unstable_cache(
         return 0;
       }
 
-      const json = (await response.json()) as { stargazers_count?: number };
-      return Number(json?.stargazers_count) || 0;
+      const json = (await response.json()) as {
+        followers?: number;
+      };
+
+      return Number(json?.followers) || 0;
     } catch {
       return 0;
     }
   },
-  ["github-stargazer-count"],
+  ["github-follower-count"],
   { revalidate: 86_400 }
 );

@@ -2,7 +2,7 @@ export const GITHUB = {
   branch: "main",
   org: "shadcn-labs",
   repo: "aniketpawar.com",
-  user: "Aniket-508",
+  user: "devxoshakya",
 } as const;
 
 const GITHUB_URL = `https://github.com/${GITHUB.user}`;
@@ -11,6 +11,9 @@ export const LINK = {
   BLUESKY: "https://bsky.app/profile/alaymanguy.bsky.social",
   CALENDLY: "https://cal.com/aniket-pawar",
   CLARITY: "https://clarity.microsoft.com",
+  LEETCODE: "https://leetcode.com/aniket508",
+  GFG: "https://auth.geeksforgeeks.org/user/aniket508",
+  INSTAGRAM: "https://instagram.com/alaymanguy",
   DAILYDEV: "https://daily.dev/aniket508",
   DISCORD: "https://discordapp.com/users/393317827186130964",
   EMAIL: "pawaraniket508@gmail.com",

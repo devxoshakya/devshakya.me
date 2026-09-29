@@ -7,10 +7,11 @@ import {
   TooltipTrigger,
 } from "@devshakya.me/ui/components/tooltip";
 import { LINK } from "@/constants/links";
-import { getStargazerCount } from "@/lib/github/stargazers";
+import { getFollowerCount } from "@/lib/github/followers";
 
 const NavItemGitHub = async () => {
-  const stargazerCount = await getStargazerCount();
+  const followerCount = await getFollowerCount();
+  console.log("followerCount", followerCount);
 
   return (
     <Tooltip>
@@ -39,7 +40,7 @@ const NavItemGitHub = async () => {
         }
       />
       <TooltipContent side="bottom">
-        {new Intl.NumberFormat("en-US").format(stargazerCount)} stars
+        {new Intl.NumberFormat("en-US").format(followerCount)} followers
       </TooltipContent>
     </Tooltip>
   );

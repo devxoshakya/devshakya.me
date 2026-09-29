@@ -260,7 +260,11 @@ export function ExperienceItem({
     const subtitle = roles.map((r) => r.title).join(" & ");
 
     return (
-        <Collapsible className="group/exp border-b" defaultOpen={defaultOpen}>
+        <Collapsible
+            className="group/exp relative after:absolute after:bottom-0 after:left-1/2 after:w-[84%] after:-translate-x-1/2 after:border-b after:border-border"
+            defaultOpen={defaultOpen}
+        >
+            {" "}
             <CollapsibleTrigger className="relative flex w-full cursor-pointer items-start gap-2 px-4 py-4 text-left">
                 {logo ? (
                     <img
@@ -309,7 +313,6 @@ export function ExperienceItem({
                     />
                 )}
             </CollapsibleTrigger>
-
             <CollapsibleContent
                 className="
         h-(--collapsible-panel-height) overflow-hidden
