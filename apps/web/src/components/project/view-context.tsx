@@ -33,7 +33,7 @@ interface ProjectsViewProviderProps {
 const ProjectsViewProvider = ({
   children,
   defaultSource = DEFAULT_PROJECT_SOURCE,
-  defaultVariant = "list",
+  defaultVariant = "grid",
 }: ProjectsViewProviderProps) => {
   const [source, setSourceState] = useState<ProjectSource>(defaultSource);
   const [variant, setVariantState] = useState<Variant>(defaultVariant);

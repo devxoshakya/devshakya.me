@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 
-export type ProjectSource = "personal" | "shadcn-labs";
+export type ProjectSource = "personal" | "Freelance" | "freelance" | "shadcn-labs";
 
 export type SourceIcon = ComponentType<SVGProps<SVGSVGElement>>;
 

@@ -52,7 +52,7 @@ const ProjectSourceCombobox = ({
           tabsListVariants({ variant: "default" }),
           "inline-flex w-fit gap-0.5 border-0 shadow-none hover:bg-muted",
           "focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring",
-          "data-popup-open:bg-muted",
+          "data-popup-open:bg-muted text-xs",
           className
         )}
       >

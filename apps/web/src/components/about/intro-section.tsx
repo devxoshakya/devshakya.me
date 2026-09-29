@@ -48,7 +48,7 @@ const IntroSection = ({ children }: IntroSectionProps) => {
       id="about"
       className={ "animate-none space-y-4"}
     >
-      <IntroProfile mode={"play"} />
+      <IntroProfile mode={"skip"} />
       {children}
     </Section>
   );

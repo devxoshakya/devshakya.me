@@ -1,14 +1,13 @@
 "use client";
 
 import { AppLink } from "@/components/ui/app-link";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@devshakya.me/ui/components/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@devshakya.me/ui/components/tooltip";
 import type { SoftwareItem } from "@/constants/software";
-import type { Variant } from "@/lib/events";
 import { cn } from "@/lib/utils";
 
 interface TechStackItemProps extends Omit<
@@ -18,7 +17,7 @@ interface TechStackItemProps extends Omit<
   index: number;
   category: string;
   items: SoftwareItem[];
-  variant?: Variant;
+  variant?: "list" | "grid";
 }
 
 const TechStackItem = ({

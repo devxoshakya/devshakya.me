@@ -2,12 +2,14 @@
 
 import { CopyLink } from "@/components/copy-link";
 import type { GlimpseData } from "@/components/ui/glimpse/types";
+import BlurFade from "@/components/project/blur-fade";
 import { Title } from "@devshakya.me/ui/components/title";
 import { filterProjectsBySource } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types/projects";
 
 import { ProjectItem } from "./item";
+import ProjectCard from "./project-card";
 import { ProjectsViewProvider, useProjectsView } from "./view-context";
 import { ProjectsViewToolbar } from "./view-toolbar";
 import type { ProjectSourceControl } from "./view-toolbar";
@@ -44,23 +46,40 @@ const ProjectsViewList = ({
     <div
       className={cn(
         "group grid grid-cols-1",
-        variant === "grid" &&
-          "sm:grid-cols-2 sm:[&>*:nth-child(2n+1)]:pr-4 sm:[&>*:nth-child(2n+2)]:pl-4 [&>*:nth-child(2n+1)]:pb-4 [&>*:nth-child(2n+2)]:pb-4",
+        variant === "grid" && "gap-8",
         variant === "list" && "divide-y divide-border",
         viewClassName
       )}
     >
-      {filteredProjects.map((project) => (
-        <ProjectItem
-          key={project.slug}
-          slug={project.slug}
-          title={project.title}
-          description={project.description}
-          links={project.links}
-          previews={previews}
-          variant={variant}
-          showHeader={showHeader}
-        />
+      {filteredProjects.map((project, index) => (
+        variant === "grid" ? (
+          <ProjectCard
+            key={project.slug}
+            imageSrc={
+              previews[project.links.website ?? ""]?.image ??
+              "/project-placeholder.svg"
+            }
+            title={project.title}
+            tags={[project.category, project.source]}
+            timeline={`${project.date.month} ${project.date.year}`}
+            tagline={project.description}
+            delay={index * 0.05}
+            sourceCodeHref={project.links.github ?? project.links.website ?? "#"}
+            liveDemoHref={project.links.website ?? `/projects/${project.slug}`}
+          />
+        ) : (
+          <BlurFade key={project.slug} delay={index * 0.05}>
+            <ProjectItem
+              slug={project.slug}
+              title={project.title}
+              description={project.description}
+              links={project.links}
+              previews={previews}
+              variant={variant}
+              showHeader={showHeader}
+            />
+          </BlurFade>
+        )
       ))}
     </div>
   );

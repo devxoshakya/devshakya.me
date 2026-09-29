@@ -16,8 +16,8 @@ export const PROJECT_SOURCES = [
   },
   {
     icon: Icons.shadcnlabs,
-    label: "Shadcn Labs",
-    value: "shadcn-labs",
+    label: "Freelance",
+    value: "freelance",
   },
 ] as const satisfies readonly ProjectSourceOption[];
 

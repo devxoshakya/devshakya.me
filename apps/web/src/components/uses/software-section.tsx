@@ -3,15 +3,15 @@
 import { useState } from "react";
 
 import { CopyLink } from "@/components/copy-link";
-import { Section } from "@/components/ui/section";
-import { Title } from "@/components/ui/title";
+import { Section } from "@devshakya.me/ui/components/section";
+import { Title } from "@devshakya.me/ui/components/title";
 import { ViewToggle } from "@/components/view-tabs";
 import { SOFTWARE_ITEMS } from "@/constants/software";
 import type { SoftwareItem } from "@/constants/software";
-import type { Variant } from "@/lib/events";
 import { cn } from "@/lib/utils";
 
 import { TechStackItem } from "./item";
+import BlurFade from "../project/blur-fade";
 
 const groupByCategory = (
   items: SoftwareItem[]
@@ -26,7 +26,7 @@ const groupByCategory = (
 };
 
 const SoftwareSection = () => {
-  const [variant, setVariant] = useState<Variant>("list");
+    const [variant, setVariant] = useState<"list" | "grid">("list");
   const grouped = groupByCategory(SOFTWARE_ITEMS);
 
   return (
@@ -54,13 +54,14 @@ const SoftwareSection = () => {
         )}
       >
         {Object.entries(grouped).map(([category, catItems], index) => (
-          <TechStackItem
-            key={category}
-            index={index}
-            category={category}
-            items={catItems}
-            variant={variant}
-          />
+          <BlurFade key={category} delay={index * 0.05}>
+            <TechStackItem
+              index={index}
+              category={category}
+              items={catItems}
+              variant={variant}
+            />
+          </BlurFade>
         ))}
       </div>
     </Section>
