@@ -28,28 +28,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const routeEntry = (route: string, priority: Priority): SitemapEntry =>
         entry(absoluteUrl(route), priority);
 
-    const collectionEntries = (
-        route: string,
-        slugs: string[],
-        priority: Priority
-    ): SitemapEntry[] =>
-        slugs.map((slug) => routeEntry(`${route}/${slug}`, priority));
-
     return [
         entry(SITE.URL, PRIORITY.HOME),
 
-        routeEntry(ROUTES.PROJECTS, PRIORITY.INDEX),
-        routeEntry(ROUTES.CRAFTS, PRIORITY.INDEX),
-        routeEntry(ROUTES.EXPERIENCES, PRIORITY.INDEX),
-        routeEntry(ROUTES.WRITING, PRIORITY.INDEX),
-        routeEntry(ROUTES.USES, PRIORITY.INDEX),
-        routeEntry(ROUTES.COMPONENTS, PRIORITY.INDEX),
-        routeEntry(ROUTES.BLOCKS, PRIORITY.INDEX),
-
-        routeEntry(ROUTES.TESTIMONIALS, PRIORITY.PRIMARY),
-
-        routeEntry(ROUTES.SPONSORS, PRIORITY.SECONDARY),
-        routeEntry(ROUTES.COLOPHON, PRIORITY.SECONDARY),
-
+        routeEntry(ROUTES.ABOUT, PRIORITY.INDEX),
+        routeEntry(ROUTES.BLOG, PRIORITY.INDEX),
+        routeEntry(ROUTES.PINS, PRIORITY.INDEX),
     ];
 }

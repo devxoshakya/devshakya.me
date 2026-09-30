@@ -10,8 +10,9 @@ import {
 import type { ReactNode } from "react";
 
 import { DEFAULT_PROJECT_SOURCE } from "@/constants/projects";
-import type { Variant } from "@/lib/events";
 import type { ProjectSource } from "@/types/projects";
+
+type Variant = "grid" | "list";
 
 interface ProjectsViewContextValue {
   source: ProjectSource;

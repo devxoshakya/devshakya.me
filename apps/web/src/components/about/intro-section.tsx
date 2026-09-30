@@ -33,22 +33,23 @@ const IntroSection = ({ children }: IntroSectionProps) => {
     }
 
     hasHomeIntroStarted = true;
+    setIntroMode("play");
+  }, []);
 
+  const handleIntroComplete = () => {
     try {
       window.sessionStorage.setItem(HOME_INTRO_SESSION_KEY, "true");
     } catch {
       // The in-memory flag still prevents repeats during client navigation.
     }
-
-    setIntroMode("play");
-  }, []);
+  };
 
   return (
     <Section
       id="about"
-      className={ "animate-none space-y-4"}
+      className="animate-none space-y-4"
     >
-      <IntroProfile mode={"skip"} />
+      <IntroProfile mode={introMode} onComplete={handleIntroComplete} />
       {children}
     </Section>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import type { Route } from "next";
+
 import { AppLink } from "@/components/ui/app-link";
 import { Badge } from "@devshakya.me/ui/components/badge";
 import {
@@ -61,13 +63,13 @@ const TechStackItem = ({
             >
                 {items.map((item) => (
                     <li key={item.key} className="flex">
-                        <AppLink href={item.href} target="_blank">
+                        <AppLink href={item.href as Route} target="_blank">
                             {isGrid ? (
                                 <div className="rounded-md border p-1">
                                     <Tooltip>
                                         <TooltipTrigger
                                             render={
-                                                <div className="flex size-10 select-none items-center justify-center rounded-sm border [&_svg:not([class*='size-'])]:size-6">
+                                                <div className="flex size-10 select-none items-center justify-center p-1 rounded-sm border [&_svg:not([class*='size-'])]:size-6">
                                                     {item.icon}
                                                 </div>
                                             }

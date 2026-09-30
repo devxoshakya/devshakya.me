@@ -139,7 +139,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                                 onPointerDown={handlePointerDown}
                                 className="flex items-center justify-around gap-1 rounded-sm bg-black/85 px-1.5 py-1 text-[10px] font-semibold text-white dark:bg-white dark:text-black"
                             >
-                                <Icons.github className="inline-block size-3 invert dark:invert-0" />
+                                <Icons.github className="inline-block size-3" />
                                 Source Code
                             </Link>
                             <Link

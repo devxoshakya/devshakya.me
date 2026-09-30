@@ -1,7 +1,7 @@
 "use client";
 
 import { GlobeIcon } from "lucide-react";
-import Link from "next/link";
+import type { Route } from "next";
 import React from "react";
 
 import { Icons } from "@/components/icons";
@@ -15,7 +15,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@devshakya.me/ui/components/tooltip";
-import { ROUTES } from "@/constants/routes";
 import { cn } from "cn";
 import type { Project } from "@/types/projects";
 
@@ -74,19 +73,11 @@ const ProjectLink = ({
         "text-muted-foreground min-w-[60px] text-xs font-normal",
         listClassName
       )}
-      href={href}
+      href={href as Route}
       target="_blank"
       external
       previewSide="bottom"
       preview={preview}
-      eventName="external_link_click"
-      eventProperties={{
-        context: "project_item",
-        link_type: label.toLowerCase(),
-        slug,
-        title,
-        url: href,
-      }}
     >
       {label}
     </AppLink>
@@ -115,17 +106,21 @@ const ProjectItem = ({
 }: ProjectItemProps) => {
   const isGrid = variant === "grid";
   const image = previews?.[links?.website ?? ""]?.image ?? "";
+  const projectHref = links.website ?? links.github;
 
   const titleLink = (
-    <Link
-      href={`${ROUTES.PROJECTS}/${slug}`}
-      className="hover:underline underline-offset-4"
-      onClick={() =>
-        trackProjectDetailClick(slug, title, showHeader ? "home" : "listing")
-      }
-    >
-      {title}
-    </Link>
+    projectHref ? (
+      <a
+        href={projectHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline underline-offset-4"
+      >
+        {title}
+      </a>
+    ) : (
+      title
+    )
   );
 
   return (

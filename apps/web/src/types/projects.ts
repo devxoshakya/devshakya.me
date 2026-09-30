@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 
-export type ProjectSource = "personal" | "Freelance" | "freelance" | "shadcn-labs";
+export type ProjectSource = "personal" | "freelance";
 
 export type SourceIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -39,6 +39,10 @@ export interface Project {
   featured?: boolean;
   links: ProjectLinks;
   image?: string;
+  videoSrc?: string;
+  tags?: string[];
+  timeline?: string;
+  tagline?: string;
 }
 
 export interface TOCItem {

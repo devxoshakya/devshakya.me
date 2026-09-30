@@ -1,4 +1,4 @@
-import type { NavGroup, NavItem } from "@/types/nav";
+import type { NavItem } from "@/types/nav";
 
 import { ROUTES } from "./routes";
 import { getBaseUrl } from "./url";
@@ -9,6 +9,7 @@ const baseUrl = getBaseUrl();
 export const SITE = {
     AUTHOR: {
         AVATAR: USER.avatar,
+        FREELANCE_AVATAR: "/freelance-guy.jpeg",
         NAME,
         TWITTER: "@alaymanguy",
     },
@@ -48,10 +49,5 @@ export const NAV_STANDALONE: NavItem[] = [
         href: ROUTES.HOME,
         id: "home",
         label: "home",
-    },
-    {
-        href: ROUTES.CONTACT,
-        id: "contact",
-        label: "contact",
     },
 ];

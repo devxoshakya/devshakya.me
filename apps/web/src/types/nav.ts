@@ -1,25 +1,11 @@
 export type SectionId =
-  | "blocks"
-  | "components"
-  | "contact"
-  | "crafts"
-  | "experiences"
-  | "favorites"
+  | "about"
+  | "blog"
   | "home"
-  | "projects"
-  | "uses"
-  | "stats";
-
-export type NavGroupId = "extras" | "ui" | "work";
+  | "pins";
 
 export interface NavItem {
   href: string;
   id: SectionId;
   label: string;
-}
-
-export interface NavGroup {
-  id: NavGroupId;
-  label: string;
-  items: NavItem[];
 }

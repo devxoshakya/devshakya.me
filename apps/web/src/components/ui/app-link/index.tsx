@@ -19,7 +19,6 @@ import { addQueryParams } from "@/lib/url";
 import { cn } from "cn";
 
 interface AppLinkProps extends React.ComponentProps<typeof Link> {
-  eventProperties?: Record<string, string | number | boolean | null>;
   sound?: boolean;
   external?: boolean;
   preview?: GlimpseData | null;
@@ -27,7 +26,6 @@ interface AppLinkProps extends React.ComponentProps<typeof Link> {
 }
 
 const AppLink = ({
-  eventProperties,
   sound = true,
   external = false,
   preview,

@@ -26,12 +26,6 @@ const NavItemGitHub = async () => {
                 href={LINK.GITHUB_REPO}
                 target="_blank"
                 rel="noreferrer"
-                eventProperties={{
-                  context: "github_link",
-                  link_type: "github",
-                  title: "site repo",
-                  url: LINK.GITHUB_REPO,
-                }}
               />
             }
           >

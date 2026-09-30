@@ -1,6 +1,119 @@
+import type { ComponentType } from "react";
+import { CodeXmlIcon, LightbulbIcon } from "lucide-react";
 import type { Experience } from "@/types/experiences";
 
 export const HOMEPAGE_EXPERIENCE_COUNT = 3 as const;
+
+export type DetailedExperienceRole = {
+  id: string;
+  title: string;
+  type?: string;
+  start: string;
+  end?: string;
+  icon?: ComponentType<{ className?: string }>;
+  description?: string;
+  highlights?: string[];
+  bullets?: string[];
+  skills?: string[];
+};
+
+export type DetailedExperience = {
+  id: string;
+  company: string;
+  logo?: string;
+  website?: string;
+  location?: string;
+  roles: DetailedExperienceRole[];
+};
+
+export const DETAILED_EXPERIENCES: DetailedExperience[] = [
+  {
+    id: "boredheadlabs",
+    company: "Boredheadlabs",
+    logo: "https://www.devxoshakya.xyz/images/boredheadlabs.jpeg",
+    website: "https://boredheadlabs.com",
+    location: "Remote, India",
+    roles: [
+      {
+        id: "boredheadlabs-fullstack-intern",
+        title: "Full Stack Developer Intern",
+        type: "Internship",
+        start: "Aug 2025",
+        end: "Oct 2025",
+        icon: LightbulbIcon,
+        description:
+          "Built and shipped a serverless SaaS platform spanning frontend, backend, AI search, data pipelines, authentication, and cloud infrastructure.",
+        highlights: [
+          "Serverless SaaS architecture",
+          "RAG-powered search",
+          "85% reduced backend load",
+        ],
+        bullets: [
+          "Built a serverless SaaS stack using Next.js 15, PostgreSQL with Prisma, and Cloudflare Workers.",
+          "Engineered multi-provider authentication, RBAC, OAuth, and subscription-gated features.",
+          "Deployed autonomous Reddit data pipelines with cron-based ingestion on Cloudflare Workers.",
+          "Optimized queries and cache invalidation, reducing backend load by 85% and achieving sub-200ms TTFB.",
+          "Integrated Google Generative AI with RAG for context-aware search.",
+          "Built the Off Market Deals platform for discovering hidden business opportunities.",
+        ],
+        skills: [
+          "TypeScript",
+          "Next.js 15",
+          "React",
+          "PostgreSQL",
+          "Prisma",
+          "Cloudflare Workers",
+          "Cloudflare R2",
+          "Google Generative AI",
+          "RAG",
+          "OAuth",
+        ],
+      },
+    ],
+  },
+  {
+    id: "mp-pharmaceuticals",
+    company: "M P Pharmaceuticals Group of Co.",
+    logo: "https://www.devxoshakya.xyz/images/mp-pharma.png",
+    website: "https://mppharmaceuticals.com",
+    location: "Remote, Meerut, Uttar Pradesh, India",
+    roles: [
+      {
+        id: "mp-pharmaceuticals-fullstack",
+        title: "Full Stack Developer",
+        type: "Freelance",
+        start: "Apr 2025",
+        end: "Jun 2025",
+        icon: CodeXmlIcon,
+        description:
+          "Developed a high-performance production platform with AI-powered customer interaction, optimized asset delivery, and a strong technical SEO foundation.",
+        highlights: [
+          "99–100 Lighthouse scores",
+          "Gemini AI chatbot",
+          "55% smaller image payloads",
+        ],
+        bullets: [
+          "Built the platform with Next.js 15, achieving 99–100 Lighthouse scores across performance, SEO, and accessibility.",
+          "Developed and integrated a custom Gemini AI chatbot, reducing bounce rate by 18%.",
+          "Deployed Cloudflare R2 with CDN delivery, reducing image payloads by 55% and achieving 0.45s LCP.",
+          "Architected the technical SEO foundation, enabling 2× faster Google indexing.",
+          "Automated client communications with EmailJS with 99.9% delivery reliability.",
+        ],
+        skills: [
+          "Next.js 15",
+          "React",
+          "TypeScript",
+          "Tailwind CSS",
+          "Cloudflare R2",
+          "CDN",
+          "Gemini SDK",
+          "EmailJS",
+          "SEO",
+        ],
+      },
+    ],
+  },
+];
 
 export const EXPERIENCES = [
   {

@@ -3,21 +3,10 @@ import { NAV_STANDALONE } from "@/constants/site";
 import type { NavItem, SectionId } from "@/types/nav";
 
 const SECTION_ROUTES: { id: SectionId; route: string }[] = [
-  { id: "contact", route: ROUTES.CONTACT },
-  { id: "projects", route: ROUTES.PROJECTS },
-  { id: "crafts", route: ROUTES.CRAFTS },
-  { id: "experiences", route: ROUTES.EXPERIENCES },
-  { id: "favorites", route: ROUTES.FAVORITES },
-  { id: "stats", route: ROUTES.STATS },
-  { id: "uses", route: ROUTES.USES },
-  { id: "components", route: ROUTES.COMPONENTS },
-  { id: "blocks", route: ROUTES.BLOCKS },
+  { id: "blog", route: ROUTES.BLOG },
+  { id: "about", route: ROUTES.ABOUT },
+  { id: "pins", route: ROUTES.PINS },
 ];
-
-export const isNavGroupActive = (
-  items: NavItem[],
-  activeSection: SectionId | null
-): boolean => items.some((item) => item.id === activeSection);
 
 export const getActiveSection = (pathname: string): SectionId | null => {
   if (pathname === ROUTES.HOME) {

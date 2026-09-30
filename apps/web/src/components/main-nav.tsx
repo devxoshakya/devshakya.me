@@ -46,11 +46,11 @@ const MainNav = () => {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* Work */}
+            {/* Blog */}
             <NavigationMenuItem>
               <NavigationMenuLink
-                className={navLinkClass("work", activeSection)}
-                href={ROUTES.WORK}
+                className={navLinkClass("blog", activeSection)}
+                href={ROUTES.BLOG}
               >
                 blog
               </NavigationMenuLink>
@@ -68,11 +68,11 @@ const MainNav = () => {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            {/* Contact */}
+            {/* Pins */}
             <NavigationMenuItem>
               <NavigationMenuLink
-                className={navLinkClass("contact", activeSection)}
-                href={ROUTES.CONTACT}
+                className={navLinkClass("pins", activeSection)}
+                href={ROUTES.PINS}
               >
                 pins.
               </NavigationMenuLink>

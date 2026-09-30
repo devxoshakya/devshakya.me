@@ -2,6 +2,7 @@ import { AppLink } from "@/components/ui/app-link";
 import type { GlimpseData } from "@/components/ui/glimpse/types";
 import type { ResolvedContact } from "@/lib/contacts";
 import { cn } from "@/lib/utils";
+import type { Route } from "next";
 
 interface ContactItemProps
   extends ResolvedContact, Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
@@ -28,12 +29,10 @@ const ContactItem = ({
       {link?.url && (
         <AppLink
           className="text-muted-foreground text-sm font-normal"
-          href={link?.url}
+          href={link?.url as Route}
           target="_blank"
           external
           preview={preview}
-          eventName="contact_link_click"
-          eventProperties={{ platform: title, url: link.url }}
         >
           {link?.display}
         </AppLink>

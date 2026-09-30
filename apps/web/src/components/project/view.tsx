@@ -55,14 +55,14 @@ const ProjectsViewList = ({
         variant === "grid" ? (
           <ProjectCard
             key={project.slug}
-            imageSrc={
+            imageSrc={project.image ??
               previews[project.links.website ?? ""]?.image ??
-              "/project-placeholder.svg"
-            }
+              "/project-placeholder.svg"}
+            videoSrc={project.videoSrc}
             title={project.title}
-            tags={[project.category, project.source]}
-            timeline={`${project.date.month} ${project.date.year}`}
-            tagline={project.description}
+            tags={project.tags ?? [project.category, project.source]}
+            timeline={project.timeline ?? `${project.date.month} ${project.date.year}`}
+            tagline={project.tagline ?? project.description}
             delay={index * 0.05}
             sourceCodeHref={project.links.github ?? project.links.website ?? "#"}
             liveDemoHref={project.links.website ?? `/projects/${project.slug}`}

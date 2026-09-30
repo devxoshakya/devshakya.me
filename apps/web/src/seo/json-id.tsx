@@ -104,70 +104,6 @@ const normalizeBreadcrumbPath = (path: string): string => {
 
 const HOME_BREADCRUMB: BreadcrumbItem = { name: "Home", path: ROUTES.HOME };
 
-const contactBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Contact", path: ROUTES.CONTACT },
-  ...(current ? [current] : []),
-];
-
-const projectsBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Projects", path: ROUTES.PROJECTS },
-  ...(current ? [current] : []),
-];
-
-const craftsBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Crafts", path: ROUTES.CRAFTS },
-  ...(current ? [current] : []),
-];
-
-const experiencesBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Experience", path: ROUTES.EXPERIENCES },
-  ...(current ? [current] : []),
-];
-
-const favoritesBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Favorites", path: ROUTES.FAVORITES },
-  ...(current ? [current] : []),
-];
-
-const sponsorsBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Sponsors", path: ROUTES.SPONSORS },
-  ...(current ? [current] : []),
-];
-
-const writingBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Writing", path: ROUTES.WRITING },
-  ...(current ? [current] : []),
-];
-
-const colophonBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Colophon", path: ROUTES.COLOPHON },
-  ...(current ? [current] : []),
-];
-
-const testimonialsBreadcrumbs = (
-  current?: BreadcrumbItem
-): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Testimonials", path: ROUTES.TESTIMONIALS },
-  ...(current ? [current] : []),
-];
-
-
-
-const usesBreadcrumbs = (current?: BreadcrumbItem): BreadcrumbItem[] => [
-  HOME_BREADCRUMB,
-  { name: "Uses", path: ROUTES.USES },
-  ...(current ? [current] : []),
-];
-
 const BreadcrumbJsonLd = ({ items }: { items: BreadcrumbItem[] }) => {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -193,17 +129,7 @@ const JsonLdScripts = () => (
 
 export {
   BreadcrumbJsonLd,
-  colophonBreadcrumbs,
-  contactBreadcrumbs,
-  craftsBreadcrumbs,
-  experiencesBreadcrumbs,
-  favoritesBreadcrumbs,
   JsonLdScripts,
-  projectsBreadcrumbs,
-  sponsorsBreadcrumbs,
-  testimonialsBreadcrumbs,
-  usesBreadcrumbs,
-  writingBreadcrumbs,
   WebsiteJsonLd,
   OrganizationJsonLd,
   FAQJsonLd,

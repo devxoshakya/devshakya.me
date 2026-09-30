@@ -74,6 +74,7 @@ type IntroMode = "pending" | "play" | "skip";
 
 interface IntroProfileProps {
   mode: IntroMode;
+  onComplete?: () => void;
 }
 
 const ProfileHeader = ({ shouldAnimateDetails }: ProfileHeaderProps) => (
@@ -97,7 +98,7 @@ const ProfileHeader = ({ shouldAnimateDetails }: ProfileHeaderProps) => (
               : undefined
           }
         >
-          Aniket
+          Dev
         </motion.span>{" "}
         <motion.span
           className="inline-block"
@@ -109,7 +110,7 @@ const ProfileHeader = ({ shouldAnimateDetails }: ProfileHeaderProps) => (
           animate={{ opacity: 1, transform: "translate3d(0, 0, 0)" }}
           transition={detailTransition}
         >
-          Pawar
+          Shakya
         </motion.span>
       </Title>
       <motion.div
@@ -127,7 +128,7 @@ const ProfileHeader = ({ shouldAnimateDetails }: ProfileHeaderProps) => (
   </div>
 );
 
-const IntroProfile = ({ mode }: IntroProfileProps) => {
+const IntroProfile = ({ mode, onComplete }: IntroProfileProps) => {
   const shouldReduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<IntroPhase>("greetings");
   const [greetingIndex, setGreetingIndex] = useState(0);
@@ -166,6 +167,18 @@ const IntroProfile = ({ mode }: IntroProfileProps) => {
       }
     };
   }, [shouldPlayIntro]);
+
+  useEffect(() => {
+    if (mode === "play" && !shouldPlayIntro) {
+      onComplete?.();
+    }
+  }, [mode, onComplete, shouldPlayIntro]);
+
+  useEffect(() => {
+    if (mode === "play" && isIntroComplete) {
+      onComplete?.();
+    }
+  }, [isIntroComplete, mode, onComplete]);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -235,7 +248,7 @@ const IntroProfile = ({ mode }: IntroProfileProps) => {
                 className="inline-block font-semibold"
                 transition={{ layout: profileLayoutTransition }}
               >
-                Aniket
+                Dev
               </motion.span>
             </div>
           ) : null}

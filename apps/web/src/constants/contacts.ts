@@ -14,7 +14,7 @@ export const CONTACTS = [
   {
     icon: "linkedin",
     link: {
-      display: "@devshakya",
+      display: "@devxoshakya",
       url: LINK.LINKEDIN,
     },
     title: "LinkedIn",
@@ -30,7 +30,7 @@ export const CONTACTS = [
   {
     icon: "telegram",
     link: {
-      display: "@devshakya",
+      display: "@devxoshakya",
       url: LINK.TELEGRAM,
     },
     title: "Telegram",
@@ -46,7 +46,7 @@ export const CONTACTS = [
   {
     icon: "instagram",
     link: {
-      display: "@devshakya",
+      display: "@devxoshakya",
       url: LINK.INSTAGRAM,
     },
     title: "Instagram",

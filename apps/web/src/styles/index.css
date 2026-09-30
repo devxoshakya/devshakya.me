@@ -66,6 +66,8 @@
 }
 
 :root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -114,6 +116,13 @@
   --chart-marker-foreground: oklch(0.3 0 0);
   --chart-ring-background: oklch(0.9 0 0 / 0.25);
   --chart-label: oklch(0.45 0 0);
+}
+
+html::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
 }
 
 .dark {

@@ -16,6 +16,7 @@ import {
 } from "@devshakya.me/ui/components/collapsible";
 
 import { cn } from "@/lib/utils";
+import { DETAILED_EXPERIENCES } from "@/constants/experiences";
 
 import { Panel, PanelHeader, PanelTitle } from "@/components/experience/panel";
 
@@ -53,7 +54,7 @@ export type Experience = {
    Experience Data
 ========================================================= */
 
-export const EXPERIENCES: Experience[] = [
+const LEGACY_EXPERIENCES: Experience[] = [
     {
         id: "boredheadlabs",
         company: "Boredheadlabs",
@@ -147,6 +148,11 @@ export const EXPERIENCES: Experience[] = [
             },
         ],
     },
+];
+
+export const EXPERIENCES: Experience[] = [
+    ...DETAILED_EXPERIENCES,
+    ...LEGACY_EXPERIENCES.slice(2),
 ];
 
 /* =========================================================
