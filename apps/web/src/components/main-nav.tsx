@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import type { Route } from "next";
 
 import {
   NavigationMenu,
@@ -40,7 +42,7 @@ const MainNav = () => {
                   navLinkClass(homeItem.id, activeSection),
                   "-ml-2.5"
                 )}
-                href={homeItem.href}
+                render={<Link href={homeItem.href as Route} />}
               >
                 {homeItem.label}
               </NavigationMenuLink>
@@ -50,7 +52,7 @@ const MainNav = () => {
             <NavigationMenuItem>
               <NavigationMenuLink
                 className={navLinkClass("blog", activeSection)}
-                href={ROUTES.BLOG}
+                render={<Link href={ROUTES.BLOG} />}
               >
                 blog
               </NavigationMenuLink>
@@ -62,7 +64,7 @@ const MainNav = () => {
             <NavigationMenuItem>
               <NavigationMenuLink
                 className={navLinkClass("about", activeSection)}
-                href={ROUTES.ABOUT}
+                render={<Link href={ROUTES.ABOUT} />}
               >
                 about
               </NavigationMenuLink>
@@ -72,7 +74,7 @@ const MainNav = () => {
             <NavigationMenuItem>
               <NavigationMenuLink
                 className={navLinkClass("pins", activeSection)}
-                href={ROUTES.PINS}
+                render={<Link href={ROUTES.PINS} />}
               >
                 pins.
               </NavigationMenuLink>
