@@ -56,20 +56,20 @@ const FAQJsonLd = () => {
   const faqs = [
     {
       answer: SITE.DESCRIPTION.LONG,
-      question: "Who is Aniket Pawar?",
+      question: "Who is Dev Shakya?",
     },
     {
       answer:
         "Specializing in Frontend Engineering and Product Design, building high-fidelity, design-led digital products using React, Next.js, and modern web technologies.",
-      question: "What are Aniket's areas of expertise?",
+      question: "What are Dev's areas of expertise?",
     },
     {
       answer: `You can reach out to Aniket via his social profiles on LinkedIn and GitHub, or visit his website at ${SITE.URL}.`,
-      question: "How can I contact Aniket?",
+      question: "How can I contact Dev?",
     },
     {
-      answer: "Aniket is a software engineer based in India.",
-      question: "Where is Aniket based?",
+      answer: "Dev is a software engineer based in India.",
+      question: "Where is Dev based?",
     },
   ];
 

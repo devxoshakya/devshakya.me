@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Container from "@/components/container";
 import { BlogIndex, type BlogIndexPost } from "@/components/blog/blog.index";
 import { getAllFilesFrontMatter } from "@/lib/mdx";
@@ -6,15 +5,16 @@ import { Section } from "@devshakya.me/ui/components/section";
 import { Title } from "@devshakya.me/ui/components/title";
 import { CopyLink } from "@/components/copy-link";
 import BlurFade from "@/components/project/blur-fade";
+import { BreadcrumbJsonLd } from "@/seo/json-id";
+import { createMetadata } from "@/seo/metadata";
 
-export const metadata: Metadata = {
-    title: "Blog - Manu Arora",
+export const metadata = createMetadata({
+    title: "Blog",
     description:
-        "Notes on software, design engineering, freelancing, and things I learn while building.",
-    alternates: {
-        canonical: "/blog",
-    },
-};
+        "Notes from Dev Shakya on software, design engineering, freelancing, and building for the web.",
+    canonical: "/blog",
+    category: "writing",
+});
 
 export default async function BlogPage() {
     const posts = (await getAllFilesFrontMatter(
@@ -23,6 +23,9 @@ export default async function BlogPage() {
 
     return (
         <Section id="blog">
+            <BreadcrumbJsonLd
+                items={[{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }]}
+            />
             <BlurFade delay={0.04}>
                 <span className="group/social flex items-center gap-1">
                     <Title

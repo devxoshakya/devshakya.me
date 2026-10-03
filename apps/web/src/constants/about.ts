@@ -52,7 +52,6 @@ export const iconData: IconData[] = [
     },
 ]
 export const inspirationWebsites = [
-    { name: 'manuarora.in', url: 'https://manuarora.in/' },
     { name: 'canvas.hrcd.fr', url: 'https://canvas.hrcd.fr/' },
     { name: 'marcbouchenoire.com', url: 'https://marcbouchenoire.com' },
     { name: 'magicui.design', url: 'https://magicui.design/' },

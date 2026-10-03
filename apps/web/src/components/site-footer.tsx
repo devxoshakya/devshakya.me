@@ -12,12 +12,12 @@ const SiteFooter = () => (
       />
     </div>
     <DottedSeparator className="mb-3" />
-    <div className="flex items-center justify-between pt-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)]">
+    <div className="flex items-center justify-between  pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)]">
       <p className="text-muted-foreground text-xs">
-        Last updated · {getLastUpdated()}
+        &copy; {new Date().getFullYear()} <span>Dev Shakya</span>
       </p>
       <p className="text-muted-foreground text-xs">
-        &copy; {new Date().getFullYear()} <span>Aniket Pawar</span>
+        you're visitor #69
       </p>
     </div>
   </footer>

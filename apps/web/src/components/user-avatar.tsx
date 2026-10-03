@@ -25,7 +25,7 @@ export const UserAvatar = ({
   >
     <Image
       src={SITE.AUTHOR.AVATAR}
-      alt="Portrait of Aniket Pawar"
+      alt="Portrait of Dev Shakya"
       width={size}
       height={size}
       className="size-full rounded-full object-cover"

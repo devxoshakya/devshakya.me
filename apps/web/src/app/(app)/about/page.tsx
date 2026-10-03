@@ -7,11 +7,16 @@ import { CopyLink } from "@/components/copy-link";
 import { inspirationWebsites, iconData } from "@/constants/about";
 import { Section } from "@devshakya.me/ui/components/section";
 import { Title } from "@devshakya.me/ui/components/title";
+import { BreadcrumbJsonLd } from "@/seo/json-id";
+import { createMetadata } from "@/seo/metadata";
 
-export const metadata: Metadata = {
-    title: "About - Dev Shakya",
-    description: "The story, tools, and inspirations behind Dev Shakya's site.",
-};
+export const metadata = createMetadata({
+    title: "About",
+    description:
+        "Learn more about Dev Shakya, the work behind this portfolio, and the tools that shape it.",
+    canonical: "/about",
+    category: "about",
+});
 
 const p1 =
     "https://www.devxoshakya.xyz/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Favatar.9dd296fc.png&w=640&q=75";
@@ -50,6 +55,9 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 const AboutPage = () => (
     <Section id="about" className="space-y-12">
+        <BreadcrumbJsonLd
+            items={[{ name: "Home", path: "/" }, { name: "About", path: "/about" }]}
+        />
         <div className="space-y-2">
             <SectionHeading>about.</SectionHeading>
 
@@ -94,10 +102,10 @@ const AboutPage = () => (
             <div className="group/about-site-heading flex items-center gap-1">
                 <Title
                     className="text-xl font-medium italic"
-                    render={<h2 id="about-this-site">About this site</h2>}
+                    render={<h2 id="about-this-site">about this site.</h2>}
                 />
                 <CopyLink
-                    title="About this site"
+                    title="about this site"
                     className="hidden group-hover/about-site-heading:inline-flex"
                 />
             </div>
@@ -131,7 +139,7 @@ const AboutPage = () => (
         </div>
 
         <div className="space-y-3">
-            <SectionHeading>inspiration.</SectionHeading>
+            <SectionHeading>inspirations.</SectionHeading>
             <p className="text-muted-foreground text-sm leading-6">
                 I&apos;m thankful to the fantastic websites below for sparking
                 the inspiration behind this site.

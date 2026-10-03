@@ -38,6 +38,8 @@ const PolaroidPhoto: FC<PolaroidPhotoProps> = ({
                 alt={altText}
                 src={imageSrc}
                 className="size-40 object-cover grayscale transition-all delay-150 duration-300 group-hover:grayscale-0"
+                loading="eager"
+                priority
             />
             {text && (
                 <p

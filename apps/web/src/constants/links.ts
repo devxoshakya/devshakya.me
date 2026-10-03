@@ -8,7 +8,7 @@ export const GITHUB = {
 const GITHUB_URL = `https://github.com/${GITHUB.user}`;
 
 export const LINK = {
-  BLUESKY: "https://bsky.app/profile/alaymanguy.bsky.social",
+  BLUESKY: "https://bsky.app/profile/devxoshakya.bsky.social",
   CALENDLY: "https://cal.com/devxoshakya",
   LEETCODE: "https://leetcode.com/devxoshakya",
   GFG: "https://auth.geeksforgeeks.org/user/devxoshakya",
@@ -20,17 +20,17 @@ export const LINK = {
   GITHUB_REPO: `https://github.com/${GITHUB.user}/${GITHUB.repo}`,
   LICENSE: `${GITHUB_URL}/blob/${GITHUB.branch}/LICENSE`,
   LINKEDIN: "https://www.linkedin.com/in/devxoshakya",
-  PEERLIST: "https://peerlist.io/aniket_pawar",
+  PEERLIST: "https://peerlist.io/devxoshakya",
   RESUME: "/resume.pdf",
   SHADCN_LABS: "https://shadcn-labs.com",
   SHADCN_UI: "https://ui.shadcn.com",
   TELEGRAM: "https://t.me/devxoshakya",
   TOKSCALE: "https://tokscale.ai",
-  TOPMATE: "https://topmate.io/aniket_pawar",
-  TWITTER: "https://x.com/alaymanguy",
-  X: "https://x.com/alaymanguy",
+  TOPMATE: "https://topmate.io/devxoshakya",
+  TWITTER: "https://x.com/devxoshakya",
+  X: "https://x.com/devxoshakya",
   X_SHADCN_LABS: "https://x.com/shadcnlabs",
-  YOUTUBE: "https://youtube.com/@alaymanguy",
+  YOUTUBE: "https://youtube.com/@devxoshakya",
 } as const;
 
 const STORAGE_URL =

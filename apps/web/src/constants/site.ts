@@ -11,15 +11,15 @@ export const SITE = {
         AVATAR: USER.avatar,
         FREELANCE_AVATAR: "/freelance-guy.jpeg",
         NAME,
-        TWITTER: "@alaymanguy",
+        TWITTER: "@devxoshakya",
     },
     DESCRIPTION: {
-        LONG: "Frontend engineer based in Mumbai, India. I care deeply about visual craft and obsess over building products that feel fast, polished, and human. I run Shadcn Labs, an open-source org pushing the limits of the shadcn/ui ecosystem.",
+        LONG: "Software engineer based in India. I build fast, thoughtful products across frontend systems, backend infrastructure, AI, and the web.",
         SHORT:
-            "Frontend engineer obsessed with visual craft and building fast, polished, human-centric products.",
+            "Software engineer building fast, thoughtful products across frontend systems, backend infrastructure, AI, and the web.",
     },
     KEYWORDS: [
-        "Aniket Pawar",
+        "Dev Shakya",
         "Software Engineer",
         "Product Builder",
         "Frontend Engineer",
