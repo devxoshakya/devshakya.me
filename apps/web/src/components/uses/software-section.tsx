@@ -35,10 +35,10 @@ const SoftwareSection = () => {
         <div className="group/stack flex flex-1 items-center gap-1">
           <Title
             className="text-xl font-medium italic"
-            render={<h2>{"software."}</h2>}
+            render={<h2>{"stacks."}</h2>}
           />
           <CopyLink
-            title={"Software"}
+            title={"stack"}
             className="hidden group-hover/stack:inline-flex"
           />
         </div>

@@ -1,11 +1,49 @@
-const BlogPage = () => (
-  <section className="space-y-4 py-12">
-    <h1 className="font-heading text-4xl">blog.</h1>
-    <p className="max-w-xl text-muted-foreground">
-      Notes on software engineering, AI, and building thoughtful products are
-      coming soon.
-    </p>
-  </section>
-);
+import type { Metadata } from "next";
+import Container from "@/components/container";
+import { BlogIndex, type BlogIndexPost } from "@/components/blog/blog.index";
+import { getAllFilesFrontMatter } from "@/lib/mdx";
+import { Section } from "@devshakya.me/ui/components/section";
+import { Title } from "@devshakya.me/ui/components/title";
+import { CopyLink } from "@/components/copy-link";
+import BlurFade from "@/components/project/blur-fade";
 
-export default BlogPage;
+export const metadata: Metadata = {
+    title: "Blog - Manu Arora",
+    description:
+        "Notes on software, design engineering, freelancing, and things I learn while building.",
+    alternates: {
+        canonical: "/blog",
+    },
+};
+
+export default async function BlogPage() {
+    const posts = (await getAllFilesFrontMatter(
+        "blog",
+    )) as unknown as BlogIndexPost[];
+
+    return (
+        <Section id="blog">
+            <BlurFade delay={0.04}>
+                <span className="group/social flex items-center gap-1">
+                    <Title
+                        className="text-xl ml-4 font-medium italic"
+                        render={<h2>{"blogs."}</h2>}
+                    />
+                    <CopyLink
+                        title={"pins"}
+                        className="hidden group-hover/social:inline-flex"
+                    />
+                </span>
+            </BlurFade>
+            <Container className="min-h-screen">
+                <BlurFade delay={0.08}>
+                    <p className="text-foreground pt-4 text-base">
+                        I usually rearrange 0s and 1s for a living, and ocasionally
+                        write my thoughts and learnings here.
+                    </p>
+                </BlurFade>
+                <BlogIndex posts={posts} />
+            </Container>
+        </Section>
+    );
+}

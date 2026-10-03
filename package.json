@@ -32,6 +32,8 @@
     "postinstall": "varlock codegen --path ./apps/web/"
   },
   "dependencies": {
+    "rehype-pretty-code": "^0.14.5",
+    "shiki": "^4.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -186,3 +186,43 @@ html::-webkit-scrollbar,
 @utility animate-slide-in {
   @apply animate-in fade-in slide-in-from-bottom-5 blur-in-md fill-mode-both duration-600;
 }
+
+.blog-prose .blog-code-block {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--muted);
+  color: var(--foreground);
+  padding: 0.25rem;
+}
+
+.blog-prose .blog-code-block code {
+  display: grid;
+  min-width: max-content;
+  background: transparent;
+  padding: 0;
+}
+
+.blog-prose .blog-code-block code span {
+  color: var(--shiki-light);
+}
+
+.dark .blog-prose .blog-code-block code span {
+  color: var(--shiki-dark);
+}
+
+.blog-prose :not(pre) > .blog-code {
+  display: inline-block;
+  padding: 0.4 0.4rem;
+  line-height: 1;
+  font-size: 0.875em;
+
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--muted);
+}
+
+.blog-prose :not(pre) > .blog-code::before,
+.blog-prose :not(pre) > .blog-code::after {
+  content: none;
+}

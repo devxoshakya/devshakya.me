@@ -244,7 +244,7 @@ type Row = {
 /* ---------- Layout math (keep in sync) ----------
    trigger px-4 (16) + logo center (16) -> gutter line at x = 32px (left-8 in trigger)
    inside content: px-4 + row left-4      -> same x = 32px
-   rows: py-1 (4px) + leading-6 (24px)    -> first line center y = 16px (h-4)
+    rows: py-0.5 (2px) + leading-5 (20px)  -> first line center y = 12px (h-3)
 ------------------------------------------------- */
 
 export function ExperienceItem({
@@ -328,7 +328,7 @@ export function ExperienceItem({
         motion-reduce:transition-none
     "
             >
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 leading-0">
                     {rows.map((row, i) => {
                         const last = i === rows.length - 1;
 
@@ -354,7 +354,7 @@ export function ExperienceItem({
 
 function BranchRow({ last, children }: { last: boolean; children: ReactNode }) {
     return (
-        <div className="relative py-1 pl-10">
+        <div className="relative py-0.5 pl-10 leading-3">
             {last ? (
                 // Only the final branch is curved
                 <span
@@ -370,7 +370,7 @@ function BranchRow({ last, children }: { last: boolean; children: ReactNode }) {
 
                     <span
                         aria-hidden
-                        className="absolute top-[15px] left-4 h-px w-6 bg-border"
+                        className="absolute top-3 left-4 h-px w-6 bg-border"
                     />
                 </>
             )}
@@ -421,8 +421,8 @@ function buildRows({ roles }: Experience): Row[] {
                 key: `${role.id}-desc`,
                 kind: "branch",
                 content: (
-                    <p className="text-sm leading-6">{role.description}</p>
-                ),
+                    <p className="text-sm leading-5">{role.description}</p>
+                )
             });
         }
 
@@ -446,7 +446,7 @@ function buildRows({ roles }: Experience): Row[] {
                 key: `${role.id}-b-${i}`,
                 kind: "branch",
                 content: (
-                    <p className="text-sm leading-6 text-muted-foreground">
+                    <p className="text-sm leading-5 text-muted-foreground">
                         {bullet}
                     </p>
                 ),
