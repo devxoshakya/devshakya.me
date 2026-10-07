@@ -5,10 +5,15 @@ description = "FastAPI API"
 readme = "README.md"
 authors = [{ name = "Dev Shakya", email = "devxoshakya@gmail.com" }]
 requires-python = ">=3.14"
-dependencies = ["fastapi>=0.141.1", "uvicorn[standard]>=0.36.0"]
+dependencies = [
+    "fastapi>=0.141.1",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "uvicorn[standard]>=0.36.0",
+]
 
 [project.scripts]
-api = "main:app"
+api = "app.main:app"
 
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
@@ -16,3 +21,9 @@ build-backend = "uv_build"
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "ruff>=0.16.10",
+]
