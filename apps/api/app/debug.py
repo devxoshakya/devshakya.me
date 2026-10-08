@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
-from app.routes.deps import get_client_ip
+
 from app.core.exceptions import NotFound
+from app.deps import get_client_ip
 
 router = APIRouter(prefix="/debug")
 
