@@ -15,8 +15,8 @@ def create_engine(database_url: str, *, echo: bool = False) -> AsyncEngine:
     connect_args: dict = {  # type: ignore
         # PgBouncer transaction mode cannot handle prepared statements.
         "statement_cache_size": 0,
-        "timeout": 5,            # connect timeout, seconds
-        "command_timeout": 10,   # per-query timeout, keep below function max duration
+        "timeout": 5,  # connect timeout, seconds
+        "command_timeout": 10,  # per-query timeout, keep below function max duration
     }
     if sslmode in {"require", "verify-ca", "verify-full"}:
         connect_args["ssl"] = True

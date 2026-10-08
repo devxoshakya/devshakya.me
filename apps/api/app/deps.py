@@ -21,7 +21,7 @@ def get_redis(request: Request) -> Redis:
 
 def get_client_ip(
     request: Request,
-    settings: Settings = Depends(get_settings),
+    settings: Settings = Depends(get_settings),  # noqa: B008
 ) -> str:
     return _get_client_ip(
         request,
