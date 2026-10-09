@@ -67,9 +67,18 @@ class RateLimited(AppError):
     code = "rate_limited"
     message = "Too many requests."
 
-    def __init__(self, retry_after: float, message: str | None = None) -> None:
+    def __init__(
+        self,
+        retry_after: float,
+        message: str | None = None,
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         seconds = max(1, math.ceil(retry_after))
-        super().__init__(message, headers={"Retry-After": str(seconds)})
+        super().__init__(
+            message,
+            headers={"Retry-After": str(seconds), **(headers or {})},
+        )
 
 
 class ServiceUnavailable(AppError):

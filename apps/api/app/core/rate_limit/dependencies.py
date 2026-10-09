@@ -1,8 +1,8 @@
 import logging
-import math
 
-from fastapi import HTTPException, Request, Response
+from fastapi import Request, Response
 
+from app.core.exceptions import RateLimited, ServiceUnavailable
 from app.core.rate_limit.config import POLICIES
 from app.core.rate_limit.limiter import RateLimiterUnavailable
 from app.deps import ClientIP
@@ -51,12 +51,8 @@ def rate_limit(
             )
 
             if policy.failure_mode == "closed":
-                raise HTTPException(
-                    status_code=503,
-                    detail={
-                        "code": "rate_limiter_unavailable",
-                        "message": ("Request protection is temporarily unavailable."),
-                    },
+                raise ServiceUnavailable(
+                    "Request protection is temporarily unavailable.",
                     headers={"Retry-After": "1"},
                 ) from exc
 
@@ -67,19 +63,9 @@ def rate_limit(
         response.headers["X-RateLimit-Remaining"] = str(result.remaining)
 
         if not result.allowed:
-            retry_after = max(
-                1,
-                math.ceil(result.retry_after_ms / 1000),
-            )
-
-            raise HTTPException(
-                status_code=429,
-                detail={
-                    "code": "rate_limited",
-                    "message": ("Too many requests. Please try again later."),
-                },
+            raise RateLimited(
+                result.retry_after_ms / 1000,
                 headers={
-                    "Retry-After": str(retry_after),
                     "X-RateLimit-Limit": str(result.limit),
                     "X-RateLimit-Remaining": str(result.remaining),
                 },

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from app.core.client_ip import get_client_ip
 from app.core.rate_limit import rate_limit
 from app.deps import DbSession, RedisClient
+from app.schemas.visitors import VisitorOut
 from app.services.visitors import VisitorService
 
 router = APIRouter(prefix="/visitors", tags=["visitors"])
@@ -22,7 +23,12 @@ ClientIP = Annotated[str, Depends(get_client_ip)]
 VisitorSvc = Annotated[VisitorService, Depends(get_visitor_service)]
 
 
-@router.post("", summary="Record unique visit & get total", dependencies=[Depends(rate_limit("visit"))],)
+@router.post(
+    "",
+    response_model=VisitorOut,
+    summary="Record unique visit & get total",
+    dependencies=[Depends(rate_limit("visit"))],
+)
 async def record_visit(
     request: Request,
     response: Response,

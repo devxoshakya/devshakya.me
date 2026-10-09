@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from app.models.admin import Admin
 
 
-class RefreshToken(Base):
+class   RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
     __table_args__ = (

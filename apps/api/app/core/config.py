@@ -1,3 +1,4 @@
+
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,6 +17,20 @@ class Settings(BaseSettings):
     RATE_LIMIT_HMAC_SECRET: SecretStr
     VISITOR_PEPPER : SecretStr
     PASSWORD_PEPPER : SecretStr
+    # --- JWT Settings ---
+    # Generate EdDSA or ES256 keys and store them in .env
+    JWT_PRIVATE_KEY: str | None = None
+    JWT_PUBLIC_KEY: str | None = None
+    JWT_KID: str = "v1-eddsa"
+    ACCESS_TOKEN_TTL_MINUTES: int = 10
+    REFRESH_TOKEN_TTL_DAYS: int = 14
+    SESSION_MAX_DAYS: int = 30
+    
+    # --- WebAuthn Settings ---
+    WEBAUTHN_RP_ID: str = "localhost" # Change to devexoshakya.xyz in prod
+    WEBAUTHN_RP_NAME: str = "Portfolio Admin"
+    WEBAUTHN_ORIGINS: list[str] = ["http://localhost:3000"]
+    ENROLLMENT_TTL_MINUTES: int = 10
 
 
 settings = Settings()  # type: ignore[reportCallIssue]

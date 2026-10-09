@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 async def check_db(db: AsyncSession) -> bool:
     try:
-        await db.execute(text("SELECT 1")), # type: ignore
+        await db.execute(text("SELECT 1"))
         return True
     except Exception:
         logger.exception("db_check_failed")
