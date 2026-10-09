@@ -13,7 +13,10 @@ from app.core.exceptions import Unauthorized
 from app.core.jwt import AccessTokenClaims, verify_access_token
 from app.db.session import session_scope
 from app.models.admin import Admin
+from app.repositories.pin import PinRepository
 from app.services.auth.blacklist import BlacklistService
+from app.services.pins import PinService
+from app.services.storage import R2StorageService, StorageService
 
 
 async def get_db(request: Request) -> AsyncIterator[AsyncSession]:
@@ -72,3 +75,27 @@ async def get_current_admin(
         raise Unauthorized("Admin account not found.")
 
     return admin
+
+
+_storage_instance: StorageService | None = None
+
+
+def get_storage_service() -> StorageService:
+    global _storage_instance
+    settings = get_settings()
+    if _storage_instance is None:
+        _storage_instance = R2StorageService(
+            account_id=settings.R2_ACCOUNT_ID,
+            access_key_id=settings.R2_ACCESS_KEY_ID,
+            secret_access_key=settings.R2_SECRET_ACCESS_KEY,
+            bucket=settings.R2_BUCKET,
+        )
+    return _storage_instance
+
+
+def get_pin_service(
+    redis: RedisClient,
+    storage: Annotated[StorageService, Depends(get_storage_service)],
+) -> PinService:
+    repo = PinRepository()
+    return PinService(redis=redis, storage=storage, pin_repo=repo)

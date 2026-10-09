@@ -37,6 +37,11 @@ class NotFound(AppError):
     code = "not_found"
     message = "Resource not found."
 
+class BadRequest(AppError):
+    status_code = 400
+    code = "bad_request"
+    message = "The request is malformed or invalid."
+
 
 class Unauthorized(AppError):
     status_code = 401

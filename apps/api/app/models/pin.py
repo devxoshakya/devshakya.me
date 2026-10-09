@@ -14,27 +14,27 @@ class Pin(TimestampMixin, Base):
 
     __table_args__ = (
         CheckConstraint(
-            "char_length(trim(alt_text)) > 0",
+            sqltext="char_length(trim(alt_text)) > 0",
             name="alt_text_not_blank",
         ),
         CheckConstraint(
-            "link_url IS NULL OR link_url ~* '^https?://'",
+            sqltext="link_url IS NULL OR link_url ~* '^https?://'",
             name="link_url_scheme",
         ),
         CheckConstraint(
-            "left(object_key, 5) = 'pins/'",
+            sqltext="left(object_key, 5) = 'pins/'",
             name="object_key_prefix",
         ),
         CheckConstraint(
-            "mime_type IN ('image/jpeg', 'image/png', 'image/webp', 'image/avif')",
+            sqltext="mime_type IN ('image/jpeg', 'image/png', 'image/webp', 'image/avif')",
             name="mime_type_allowed",
         ),
         CheckConstraint(
-            "bytes > 0",
+            sqltext="bytes > 0",
             name="bytes_positive",
         ),
         CheckConstraint(
-            "(width IS NULL AND height IS NULL) OR (width > 0 AND height > 0)",
+            sqltext="(width IS NULL AND height IS NULL) OR (width > 0 AND height > 0)",
             name="dimensions_valid",
         ),
     )
@@ -58,6 +58,11 @@ class Pin(TimestampMixin, Base):
 
     link_url: Mapped[str | None] = mapped_column(
         String(2048),
+        nullable=True,
+    )
+
+    blur_hash: Mapped[str | None] = mapped_column(
+        String(100),
         nullable=True,
     )
 

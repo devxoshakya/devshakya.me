@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Pin Board Admin & Gallery</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-950 text-gray-100 min-h-screen font-sans p-4 sm:p-8">
+        <div class="max-w-6xl mx-auto space-y-8">
+            <!-- Header -->
+            <header
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-800"
+            >
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Pin Board Manager</h1>
+                    <p class="text-sm text-gray-400">
+                        Direct-to-R2 upload with client-side EXIF stripping & Blurhash
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <input
+                        type="text"
+                        id="apiBase"
+                        value="http://localhost:8000"
+                        placeholder="API Base URL"
+                        class="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500 w-full sm:w-64"
+                    />
+                    <input
+                        type="password"
+                        id="authToken"
+                        placeholder="Admin Bearer Token"
+                        class="bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500 w-full sm:w-64"
+                    />
+                </div>
+            </header>
+
+            <!-- Upload Form -->
+            <section
+                class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl"
+            >
+                <h2 class="text-lg font-semibold text-white mb-4">Upload New Pin</h2>
+
+                <form id="uploadForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300"
+                                >Select Image File</label
+                            >
+                            <input
+                                type="file"
+                                id="fileInput"
+                                accept="image/jpeg,image/png,image/webp,image/avif"
+                                required
+                                class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer border border-gray-800 rounded-lg bg-gray-950"
+                            />
+                            <p class="text-xs text-gray-500">
+                                EXIF tags automatically stripped during upload
+                            </p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300"
+                                >Alt Text <span class="text-red-400">*</span></label
+                            >
+                            <input
+                                type="text"
+                                id="altText"
+                                required
+                                placeholder="Descriptive accessibility text..."
+                                class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300"
+                                >Caption (Optional)</label
+                            >
+                            <input
+                                type="text"
+                                id="caption"
+                                placeholder="Pin description..."
+                                class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300"
+                                >Link URL (Optional)</label
+                            >
+                            <input
+                                type="url"
+                                id="linkUrl"
+                                placeholder="https://example.com"
+                                class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex items-center gap-4">
+                        <button
+                            type="submit"
+                            id="submitBtn"
+                            class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors duration-150 disabled:opacity-50"
+                        >
+                            Upload Pin
+                        </button>
+                        <span id="statusText" class="text-sm text-gray-400"></span>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Feed Grid -->
+            <section class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-white">Public Pin Feed</h2>
+                    <button
+                        onclick="fetchPins()"
+                        class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-md text-sm border border-gray-700 transition"
+                    >
+                        Refresh
+                    </button>
+                </div>
+
+                <div
+                    id="pinGrid"
+                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                ></div>
+
+                <div id="loadMoreContainer" class="text-center pt-4 hidden">
+                    <button
+                        id="loadMoreBtn"
+                        class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-lg text-sm border border-gray-700"
+                    >
+                        Load More
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <script type="module">
+            import {
+                decode,
+                encode,
+            } from 'https://cdn.jsdelivr.net/npm/blurhash@2.0.5/+esm';
+
+            const CDN_BASE_URL = 'https://cdn2.devxoshakya.xyz';
+            let nextCursor = null;
+
+            function setStatus(msg, isError = false) {
+                const el = document.getElementById('statusText');
+                el.textContent = msg;
+                el.className = isError
+                    ? 'text-sm text-red-400 font-medium'
+                    : 'text-sm text-indigo-400';
+            }
+
+            // 1. Process Image: Strip EXIF metadata & Calculate Blurhash
+            async function processImage(file) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+
+                    img.onload = async () => {
+                        const width = img.naturalWidth;
+                        const height = img.naturalHeight;
+
+                        // A. EXIF Stripping: Draw to full canvas and re-encode to clean Blob
+                        const cleanCanvas = document.createElement('canvas');
+                        cleanCanvas.width = width;
+                        cleanCanvas.height = height;
+                        const cleanCtx = cleanCanvas.getContext('2d');
+                        cleanCtx.drawImage(img, 0, 0);
+
+                        const mimeType =
+                            file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        const cleanBlob = await new Promise((r) =>
+                            cleanCanvas.toBlob(r, mimeType, 0.92),
+                        );
+
+                        // B. Blurhash: Scale down to 32x32 thumbnail and encode
+                        const thumbCanvas = document.createElement('canvas');
+                        thumbCanvas.width = 32;
+                        thumbCanvas.height = 32;
+                        const thumbCtx = thumbCanvas.getContext('2d');
+                        thumbCtx.drawImage(img, 0, 0, 32, 32);
+                        const imageData = thumbCtx.getImageData(0, 0, 32, 32);
+
+                        const blurHash = encode(imageData.data, 32, 32, 4, 3);
+                        URL.revokeObjectURL(img.src);
+
+                        resolve({
+                            blob: cleanBlob,
+                            mimeType: mimeType,
+                            width: width,
+                            height: height,
+                            blurHash: blurHash,
+                            sizeBytes: cleanBlob.size,
+                        });
+                    };
+
+                    img.onerror = () => {
+                        URL.revokeObjectURL(img.src);
+                        reject(new Error('Failed to process image file'));
+                    };
+                });
+            }
+
+            // 2. Upload Form Handler
+            document
+                .getElementById('uploadForm')
+                .addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const apiBase = document
+                        .getElementById('apiBase')
+                        .value.replace(/\/$/, '');
+                    const token = document.getElementById('authToken').value.trim();
+                    const fileInput = document.getElementById('fileInput');
+                    const altText = document.getElementById('altText').value.trim();
+                    const caption =
+                        document.getElementById('caption').value.trim() || null;
+                    const linkUrl =
+                        document.getElementById('linkUrl').value.trim() || null;
+
+                    if (!token)
+                        return setStatus('Admin bearer token is required.', true);
+                    if (!fileInput.files.length)
+                        return setStatus('Please select an image file.', true);
+
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.disabled = true;
+
+                    try {
+                        // Step 1: Strip EXIF + Generate Blurhash
+                        setStatus('Stripping EXIF metadata & generating Blurhash...');
+                        const processed = await processImage(fileInput.files[0]);
+
+                        // Step 2: Request Upload Ticket
+                        setStatus('Requesting upload ticket from API...');
+                        const ticketRes = await fetch(`${apiBase}/pins/upload-url`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({
+                                mime_type: processed.mimeType,
+                                size_bytes: processed.sizeBytes,
+                                width: processed.width,
+                                height: processed.height,
+                                blur_hash: processed.blurHash,
+                            }),
+                        });
+
+                        if (!ticketRes.ok) {
+                            const err = await ticketRes.json().catch(() => ({}));
+                            throw new Error(
+                                err.detail || 'Failed to issue upload ticket',
+                            );
+                        }
+
+                        const ticket = await ticketRes.json();
+
+                        // Step 3: Direct PUT to R2 Storage (Cleaned Blob)
+                        setStatus('Uploading EXIF-free image to Cloudflare R2...');
+                        const uploadRes = await fetch(ticket.upload_url, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': processed.mimeType },
+                            body: processed.blob,
+                        });
+
+                        if (!uploadRes.ok)
+                            throw new Error('Direct storage upload failed');
+
+                        // Step 4: Confirm & Publish Pin
+                        setStatus('Confirming upload with backend...');
+                        const confirmRes = await fetch(
+                            `${apiBase}/pins/${ticket.pin_id}/confirm`,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                    alt_text: altText,
+                                    caption: caption,
+                                    link_url: linkUrl,
+                                    blur_hash: processed.blurHash,
+                                }),
+                            },
+                        );
+
+                        if (!confirmRes.ok) {
+                            const err = await confirmRes.json().catch(() => ({}));
+                            throw new Error(err.detail || 'Confirmation failed');
+                        }
+
+                        const pin = await confirmRes.json();
+                        setStatus('Pin published successfully!');
+                        document.getElementById('uploadForm').reset();
+                        renderPinCard(pin, true);
+                    } catch (err) {
+                        setStatus(err.message, true);
+                    } finally {
+                        submitBtn.disabled = false;
+                    }
+                });
+
+            // 3. Fetch Pins Feed
+            window.fetchPins = async function (append = false) {
+                const apiBase = document
+                    .getElementById('apiBase')
+                    .value.replace(/\/$/, '');
+                const grid = document.getElementById('pinGrid');
+                const url = new URL(`${apiBase}/pins`);
+                url.searchParams.set('limit', '12');
+                if (append && nextCursor) url.searchParams.set('cursor', nextCursor);
+
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Failed to load feed');
+
+                    const data = await res.json();
+                    nextCursor = data.next_cursor;
+
+                    if (!append) grid.innerHTML = '';
+                    data.items.forEach((pin) => renderPinCard(pin));
+
+                    const loadMoreContainer =
+                        document.getElementById('loadMoreContainer');
+                    loadMoreContainer.className = nextCursor
+                        ? 'text-center pt-4'
+                        : 'hidden';
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+
+            // 4. Render Card
+            function renderPinCard(pin, prepend = false) {
+                const grid = document.getElementById('pinGrid');
+                                const cdnUrl = pin.cdn_url || pin.image_url;
+                                const aspectRatio =
+                                        pin.width && pin.height ? `${pin.width} / ${pin.height}` : '4 / 3';
+
+                const card = document.createElement('div');
+                card.className =
+                    'bg-gray-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col shadow-lg';
+                card.innerHTML = `
+                <div class="relative bg-black/40 overflow-hidden group" style="aspect-ratio: ${aspectRatio}">
+                    <canvas
+                        width="32"
+                        height="32"
+                        aria-hidden="true"
+                        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+                    ></canvas>
+          <img 
+                        src="${escapeHtml(cdnUrl)}" 
+            alt="${escapeHtml(pin.alt_text)}" 
+            loading="lazy" 
+                        class="relative z-10 h-full w-full object-cover opacity-0 transition-opacity duration-300 group-hover:scale-105"
+          />
+        </div>
+        <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+          <div>
+            <p class="text-sm text-gray-200 font-medium line-clamp-2">${escapeHtml(pin.caption || pin.alt_text)}</p>
+            <p class="text-xs text-gray-500 mt-1">${pin.width && pin.height ? `${pin.width}x${pin.height} • ` : ''}${(pin.size_bytes / 1024).toFixed(1)} KB</p>
+            ${pin.blur_hash ? `<p class="text-[10px] text-gray-600 font-mono mt-0.5 truncate">Hash: ${escapeHtml(pin.blur_hash)}</p>` : ''}
+          </div>
+          ${
+              pin.link_url
+                  ? `
+            <a href="${escapeHtml(pin.link_url)}" target="_blank" rel="noopener" class="text-xs text-indigo-400 hover:underline truncate block">
+              ${escapeHtml(pin.link_url)}
+            </a>
+          `
+                  : ''
+          }
+        </div>
+      `;
+
+                if (prepend) grid.prepend(card);
+                else grid.appendChild(card);
+
+                const placeholder = card.querySelector('canvas');
+                const image = card.querySelector('img');
+
+                if (pin.blur_hash && placeholder) {
+                    try {
+                        const pixels = decode(pin.blur_hash, 32, 32);
+                        const context = placeholder.getContext('2d');
+                        context.putImageData(new ImageData(pixels, 32, 32), 0, 0);
+                    } catch (error) {
+                        console.warn('Invalid blur hash:', error);
+                        placeholder.classList.add('hidden');
+                    }
+                } else {
+                    placeholder?.classList.add('hidden');
+                }
+
+                image.addEventListener('load', () => {
+                    image.classList.replace('opacity-0', 'opacity-100');
+                    placeholder?.classList.add('opacity-0');
+                });
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(
+                    /[&<>"']/g,
+                    (m) =>
+                        ({
+                            '&': '&amp;',
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '"': '&quot;',
+                            "'": '&#039;',
+                        })[m],
+                );
+            }
+
+            document
+                .getElementById('loadMoreBtn')
+                .addEventListener('click', () => fetchPins(true));
+
+            fetchPins();
+        </script>
+    </body>
+</html>

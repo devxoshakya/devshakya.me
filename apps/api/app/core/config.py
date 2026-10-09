@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     REDIS_URL: str
     WAKATIME_API_KEY: str
     R2_ACCESS_KEY_ID: str
+    R2_BUCKET : str
+    R2_ACCOUNT_ID: str
     R2_SECRET_ACCESS_KEY: str
+    R2_PUBLIC_BASE_URL : str
     CLIENT_IP_HEADER: str = "x-forwarded-for"
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
     APP_ENV: str = "dev"
@@ -31,6 +34,9 @@ class Settings(BaseSettings):
     WEBAUTHN_RP_NAME: str = "Portfolio Admin"
     WEBAUTHN_ORIGINS: list[str] = ["http://localhost:5500", "http://localhost:3000", "http://localhost:8000"]
     ENROLLMENT_TTL_MINUTES: int = 10
+    
+    # --- Pins ----
+    PIN_MAX_BYTES: int = 15 * 1024 * 1024  # 5 MB
 
 
 settings = Settings()  # type: ignore[reportCallIssue]
