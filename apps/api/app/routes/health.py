@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.core.exceptions import ServiceUnavailable
+from app.core.rate_limit import rate_limit
 from app.deps import DbSession, RedisClient
 from app.schemas.health import HealthOut, ReadyOut
 from app.services.health import check_readiness
@@ -8,7 +9,9 @@ from app.services.health import check_readiness
 router = APIRouter(tags=["Health"])
 
 
-@router.get("/health", response_model=HealthOut)
+@router.get(
+    "/health", response_model=HealthOut, dependencies=[Depends(rate_limit("read"))]
+)
 async def health() -> HealthOut:
     return HealthOut(status="ok")
 

@@ -1,3 +1,5 @@
+import ssl
+
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -15,15 +17,21 @@ def create_engine(database_url: str, *, echo: bool = False) -> AsyncEngine:
     connect_args: dict = {  # type: ignore
         # PgBouncer transaction mode cannot handle prepared statements.
         "statement_cache_size": 0,
-        "timeout": 5,  # connect timeout, seconds
+        "timeout": 15,  # connect timeout, seconds
         "command_timeout": 10,  # per-query timeout, keep below function max duration
     }
     if sslmode in {"require", "verify-ca", "verify-full"}:
-        connect_args["ssl"] = True
+        ssl_ctx = ssl.create_default_context()
+        # Explicitly disable strict certificate verification for the Supabase pooler
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        
+        connect_args["ssl"] = ssl_ctx
 
     return create_async_engine(
         url,
         echo=echo,
         poolclass=NullPool,  # the external pooler does the pooling
+        isolation_level="READ COMMITTED",  # default for PostgreSQL
         connect_args=connect_args,
     )

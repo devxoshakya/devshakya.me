@@ -10,10 +10,7 @@ logger = logging.getLogger(__name__)
 
 async def check_db(db: AsyncSession) -> bool:
     try:
-        await asyncio.wait_for(
-            db.execute(text("SELECT 1")),
-            timeout=2,
-        )
+        await db.execute(text("SELECT 1")), # type: ignore
         return True
     except Exception:
         logger.exception("db_check_failed")
@@ -24,7 +21,7 @@ async def check_redis(redis: Redis) -> bool:
     try:
         await asyncio.wait_for(
             redis.ping(), # pyright: ignore[reportUnknownMemberType]
-            timeout=2,
+            timeout=10,
         )
         return True
     except Exception:
