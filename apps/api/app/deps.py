@@ -13,7 +13,7 @@ from app.core.exceptions import Unauthorized
 from app.core.jwt import AccessTokenClaims, verify_access_token
 from app.db.session import session_scope
 from app.models.admin import Admin
-from app.services.blacklist import BlacklistService
+from app.services.auth.blacklist import BlacklistService
 
 
 async def get_db(request: Request) -> AsyncIterator[AsyncSession]:

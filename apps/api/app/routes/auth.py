@@ -23,9 +23,9 @@ from app.schemas.auth import (
     PasskeyRegisterVerifyRequest,
     PasswordLoginRequest,
 )
-from app.services.auth import hash_password, needs_rehash, verify_password
-from app.services.passkey import PasskeyService
-from app.services.token_rotation import RefreshTokenRotationService
+from app.services.auth.auth import hash_password, needs_rehash, verify_password
+from app.services.auth.passkey import PasskeyService
+from app.services.auth.token_rotation import RefreshTokenRotationService
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def set_refresh_cookie(response: Response, raw_token: str) -> None:
         httponly=True,
         secure=True,
         samesite="strict",
-        path="/api/v1/auth",
+        path="/auth",
         max_age=settings.REFRESH_TOKEN_TTL_DAYS * 86400,
     )
 
@@ -46,7 +46,7 @@ def set_refresh_cookie(response: Response, raw_token: str) -> None:
 def clear_refresh_cookie(response: Response) -> None:
     response.delete_cookie(
         key="__Secure-refresh_token",
-        path="/api/v1/auth",
+        path="/auth",
         httponly=True,
         secure=True,
         samesite="strict",
@@ -79,7 +79,7 @@ async def login_password(
     raw_rt, _ = await repo.create_token(
         admin_id=admin.id,
         family_id=family_id,
-        auth_method="pwd"
+        auth_method="password"
     )
     await repo.purge_expired()
     await db.commit()
@@ -87,7 +87,7 @@ async def login_password(
     access_token = issue_access_token(
         admin_id=admin.id,
         family_id=str(family_id),
-        amr="pwd",
+        amr="password",
     )
     set_refresh_cookie(response, raw_rt)
     return AuthTokenResponse(access_token=access_token)
@@ -209,13 +209,13 @@ async def passkey_login_verify(
 
     family_id = uuid.uuid4()
     repo = RefreshTokenRepository(db)
-    raw_rt, _ = await repo.create_token(admin_id=1, family_id=family_id, auth_method="webauthn")
+    raw_rt, _ = await repo.create_token(admin_id=1, family_id=family_id, auth_method="passkey")
     await db.commit()
 
     access_token = issue_access_token(
         admin_id=1,
         family_id=str(family_id),
-        amr="webauthn",
+        amr="passkey",
     )
     set_refresh_cookie(response, raw_rt)
     return AuthTokenResponse(access_token=access_token)

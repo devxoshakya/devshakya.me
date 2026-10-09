@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.core.exceptions import Unauthorized
 from app.models.refresh_token import RefreshToken
 from app.repositories.refresh_token import RefreshTokenRepository, generate_opaque_token
-from app.services.blacklist import BlacklistService
+from app.services.auth.blacklist import BlacklistService
 
 
 class RefreshTokenRotationService:

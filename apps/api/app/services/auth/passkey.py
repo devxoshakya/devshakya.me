@@ -1,5 +1,6 @@
 # app/services/passkey.py
 import hashlib
+import json
 import secrets
 from typing import Any
 
@@ -79,7 +80,7 @@ class PasskeyService:
         )
 
         options_dict = webauthn.options_to_json(options)
-        return {"challenge_id": chal_id, "options": options_dict}
+        return {"challenge_id": chal_id, "options": json.loads(options_dict)}
 
     async def verify_registration(
         self, challenge_id: str, credential_json: str, label: str | None = None
@@ -129,7 +130,7 @@ class PasskeyService:
             ex=120,
         )
 
-        return {"challenge_id": chal_id, "options": webauthn.options_to_json(options)}
+        return {"challenge_id": chal_id, "options": json.loads(webauthn.options_to_json(options))}
 
     async def verify_login(
         self, challenge_id: str, credential_json: str

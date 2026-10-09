@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # --- WebAuthn Settings ---
     WEBAUTHN_RP_ID: str = "localhost" # Change to devexoshakya.xyz in prod
     WEBAUTHN_RP_NAME: str = "Portfolio Admin"
-    WEBAUTHN_ORIGINS: list[str] = ["http://localhost:3000"]
+    WEBAUTHN_ORIGINS: list[str] = ["http://localhost:5500", "http://localhost:3000", "http://localhost:8000"]
     ENROLLMENT_TTL_MINUTES: int = 10
 
 

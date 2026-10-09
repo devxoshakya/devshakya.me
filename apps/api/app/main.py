@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
     try:
         redis = create_redis(settings.REDIS_URL)
-        
+
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
         app.state.redis = redis
@@ -57,6 +57,9 @@ def create_app() -> FastAPI:
         docs_url=None if is_prod else "/docs",
         redoc_url=None if is_prod else "/redoc",
         openapi_url=None if is_prod else "/openapi.json",
+        swagger_ui_parameters={
+            "requestSnippetsEnabled": True,
+        },
     )
 
     register_exception_handlers(app)
@@ -70,6 +73,7 @@ def create_app() -> FastAPI:
             "Authorization",
             "X-Request-ID",
             "X-Requested-With",
+            "*",
         ],
         expose_headers=[
             "X-Request-ID",

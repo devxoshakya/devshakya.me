@@ -21,8 +21,8 @@ from app.db.session import create_session_factory
 from app.models.admin import Admin
 from app.models.passkey_credential import PasskeyCredential
 from app.models.refresh_token import RefreshToken
-from app.services.auth import hash_password
-from app.services.passkey import PasskeyService
+from apps.api.app.services.auth.auth import hash_password
+from apps.api.app.services.auth.passkey import PasskeyService
 
 app = typer.Typer(help="Portfolio API Auth Management CLI")
 
@@ -220,7 +220,7 @@ def enroll_passkey(env: str = typer.Option("dev", "--env", help="Target environm
         async with cli_resources() as (db, redis):
             service = PasskeyService(db, redis)
             token = await service.generate_enrollment_token()
-            frontend_host = "http://localhost:3000" if env != "prod" else "https://devexoshakya.xyz"
+            frontend_host = "http://localhost:8000" if env != "prod" else "https://devexoshakya.xyz"
             typer.echo(f"\nEnrollment Link (expires in 10 mins):\n{frontend_host}/admin/enroll#{token}\n")
 
     asyncio.run(_enroll())
