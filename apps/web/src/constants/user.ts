@@ -9,7 +9,7 @@ export const USER = {
     country: "India",
     locality: "Meerut",
   },
-  avatar: "/avatar.png",
+  avatar: "https://cdn2.devxoshakya.xyz/folio/avatar.png",
   company: currentExperience.experienceOrg.name,
   email: LINK.EMAIL,
   firstName: "Dev",

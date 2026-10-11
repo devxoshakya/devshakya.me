@@ -14,7 +14,7 @@ interface GitHubContributionsResponse {
 export const getGitHubContributions = unstable_cache(
   async () => {
     const res = await fetch(
-      `${`https://github-contributions-api.jogruber.de`}/v4/${GITHUB.user}?y=last`
+      `https://portfolio-api-ochre-three.vercel.app/stats/github/contributions`
     );
     const data = (await res.json()) as GitHubContributionsResponse;
     return data.contributions;
@@ -23,23 +23,3 @@ export const getGitHubContributions = unstable_cache(
   { revalidate: 86_400 }
 );
 
-export const getLastUpdated = (): string => {
-  try {
-    const date = execSync("git log -1 --format=%cd", {
-      encoding: "utf-8",
-      timeout: 5000,
-    }).trim();
-
-    return new Date(date).toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return new Date().toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
-};

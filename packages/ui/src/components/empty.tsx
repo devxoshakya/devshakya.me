@@ -53,7 +53,7 @@ const EmptyMedia = ({
 const EmptyTitle = ({ className, ...props }: React.ComponentProps<"div">) => (
   <div
     data-slot="empty-title"
-    className={cn("font-heading text-sm font-medium tracking-tight", className)}
+    className={cn("text-sm font-medium tracking-tight", className)}
     {...props}
   />
 );
