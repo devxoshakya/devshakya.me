@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from typing import Annotated
 
+import httpx
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from redis.asyncio import Redis
@@ -28,6 +29,10 @@ def get_redis(request: Request) -> Redis:
     return request.app.state.redis
 
 
+def get_http_client(request: Request) -> httpx.AsyncClient:
+    return request.app.state.http_client
+
+
 def get_client_ip(
     request: Request,
     settings: Settings = Depends(get_settings),  # noqa: B008
@@ -40,6 +45,7 @@ def get_client_ip(
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 RedisClient = Annotated[Redis, Depends(get_redis)]
+HttpClient = Annotated[httpx.AsyncClient, Depends(get_http_client)]
 ClientIP = Annotated[str, Depends(get_client_ip)]
 
 
@@ -55,7 +61,7 @@ security = HTTPBearer(auto_error=False)
 
 async def get_current_admin(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DbSession,
     blacklist_service: BlacklistSvc,
 ) -> Admin:
     if not credentials or credentials.scheme.lower() != "bearer":

@@ -21,8 +21,8 @@ from app.db.session import create_session_factory
 from app.models.admin import Admin
 from app.models.passkey_credential import PasskeyCredential
 from app.models.refresh_token import RefreshToken
-from apps.api.app.services.auth.auth import hash_password
-from apps.api.app.services.auth.passkey import PasskeyService
+from app.services.auth.auth import hash_password
+from app.services.auth.passkey import PasskeyService
 
 app = typer.Typer(help="Portfolio API Auth Management CLI")
 

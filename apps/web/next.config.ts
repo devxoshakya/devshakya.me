@@ -13,7 +13,15 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
-  }
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "https://portfolio-api-ochre-three.vercel.app/:path*",
+      },
+    ];
+  },
 };
 
 export default withVarlock(nextConfig);

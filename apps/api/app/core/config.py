@@ -8,7 +8,6 @@ class Settings(BaseSettings):
 
     POSTGRES_URL: str
     REDIS_URL: str
-    WAKATIME_API_KEY: str
     R2_ACCESS_KEY_ID: str
     R2_BUCKET : str
     R2_ACCOUNT_ID: str
@@ -37,6 +36,19 @@ class Settings(BaseSettings):
     
     # --- Pins ----
     PIN_MAX_BYTES: int = 15 * 1024 * 1024  # 5 MB
+    
+    # wakatime & github settings
+    WAKATIME_API_KEY: str
+    WAKATIME_TIMEZONE: str = "UTC"
+    GITHUB_USERNAME: str = "devxoshakya"
+    GITHUB_TOKEN: str | None = None
+    
+    WAKA_FRESH_TTL_SEC: int = 120        # 2 mins
+    WAKA_STALE_TTL_SEC: int = 86400      # 24 hours
+    GH_FRESH_TTL_SEC: int = 3600         # 1 hour
+    GH_STALE_TTL_SEC: int = 604800       # 7 days
+    
+    WAKA_ACTIVE_WINDOW_SEC: int = 600    # 10 mins
 
 
 settings = Settings()  # type: ignore[reportCallIssue]
