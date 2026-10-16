@@ -500,71 +500,96 @@ export default function Pins() {
                                             <ChevronLeft className="size-6 sm:size-7" />
                                         </motion.button>
 
-                                        <div
-                                            className="relative flex min-h-40 min-w-0 flex-1 items-center justify-center rounded-2xl"
-                                            style={{
-                                                backgroundImage:
-                                                    selectedBlurhashURL
-                                                        ? `url("${selectedBlurhashURL}")`
-                                                        : undefined,
-                                                backgroundPosition: "center",
-                                                backgroundRepeat: "no-repeat",
-                                                backgroundSize: "contain",
-                                            }}
-                                        >
-                                            <AnimatePresence>
-                                                {isImageLoading && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
+                                        <div className="relative flex min-h-40 min-w-0 flex-1 items-center justify-center">
+                                            {/* The image and its placeholder share the exact same frame. */}
+                                            <div
+                                                className="relative shrink-0 overflow-hidden rounded-2xl bg-muted"
+                                                style={{
+                                                    aspectRatio: `${selectedImage.width} / ${selectedImage.height}`,
+                                                    width: `min(100%, ${(
+                                                        (selectedImage.width /
+                                                            selectedImage.height) *
+                                                        70
+                                                    ).toFixed(3)}dvh)`,
+                                                    backgroundImage:
+                                                        isImageLoading &&
+                                                        selectedBlurhashURL
+                                                            ? `url("${selectedBlurhashURL}")`
+                                                            : undefined,
+                                                    backgroundPosition:
+                                                        "center",
+                                                    backgroundRepeat:
+                                                        "no-repeat",
+                                                    backgroundSize: "cover",
+                                                }}
+                                            >
+                                                <AnimatePresence>
+                                                    {isImageLoading && (
+                                                        <motion.div
+                                                            initial={{
+                                                                opacity: 0,
+                                                            }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                            }}
+                                                            exit={{
+                                                                opacity: 0,
+                                                            }}
+                                                            transition={{
+                                                                duration: 0.15,
+                                                            }}
+                                                            className="absolute inset-0 z-10 flex items-center justify-center"
+                                                        >
+                                                            <Loader2 className="size-5 animate-spin text-foreground/60" />
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+
+                                                <AnimatePresence
+                                                    mode="wait"
+                                                    initial={false}
+                                                >
+                                                    <motion.img
+                                                        key={selectedImage.id}
+                                                        src={selectedImage.src}
+                                                        alt={selectedImage.alt}
+                                                        width={
+                                                            selectedImage.width
+                                                        }
+                                                        height={
+                                                            selectedImage.height
+                                                        }
+                                                        draggable={false}
+                                                        initial={
+                                                            shouldReduceMotion
+                                                                ? false
+                                                                : { opacity: 0 }
+                                                        }
+                                                        animate={{
+                                                            opacity:
+                                                                isImageLoading
+                                                                    ? 0
+                                                                    : 1,
+                                                        }}
                                                         exit={{ opacity: 0 }}
                                                         transition={{
-                                                            duration: 0.15,
+                                                            duration: 0.28,
+                                                            ease: "easeInOut",
                                                         }}
-                                                        className="absolute inset-0 z-10 flex items-center justify-center"
-                                                    >
-                                                        <Loader2 className="size-5 animate-spin text-foreground/60" />
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-
-                                            <AnimatePresence
-                                                mode="wait"
-                                                initial={false}
-                                            >
-                                                <motion.img
-                                                    key={selectedImage.id}
-                                                    src={selectedImage.src}
-                                                    alt={selectedImage.alt}
-                                                    width={selectedImage.width}
-                                                    height={
-                                                        selectedImage.height
-                                                    }
-                                                    draggable={false}
-                                                    initial={
-                                                        shouldReduceMotion
-                                                            ? false
-                                                            : { opacity: 0 }
-                                                    }
-                                                    animate={{
-                                                        opacity: isImageLoading
-                                                            ? 0
-                                                            : 1,
-                                                    }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{
-                                                        duration: 0.28,
-                                                        ease: "easeInOut",
-                                                    }}
-                                                    onLoad={() =>
-                                                        setIsImageLoading(false)
-                                                    }
-                                                    onError={() =>
-                                                        setIsImageLoading(false)
-                                                    }
-                                                    className="block h-auto max-h-[70dvh] w-auto max-w-full select-none rounded-2xl object-contain"
-                                                />
-                                            </AnimatePresence>
+                                                        onLoad={() =>
+                                                            setIsImageLoading(
+                                                                false,
+                                                            )
+                                                        }
+                                                        onError={() =>
+                                                            setIsImageLoading(
+                                                                false,
+                                                            )
+                                                        }
+                                                        className="absolute inset-0 block h-full w-full select-none object-contain"
+                                                    />
+                                                </AnimatePresence>
+                                            </div>
                                         </div>
 
                                         <motion.button
