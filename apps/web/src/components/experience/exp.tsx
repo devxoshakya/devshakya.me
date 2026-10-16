@@ -18,9 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DETAILED_EXPERIENCES } from "@/constants/experiences";
 
-import { Panel, PanelHeader, PanelTitle } from "@/components/experience/panel";
-
-import { PanelTitleCopy } from "@/components/experience/panel-copy";
+import { Panel } from "@/components/experience/panel";
 import { Title } from "@devshakya.me/ui/components/title";
 import { CopyLink } from "../copy-link";
 
@@ -267,7 +265,7 @@ export function ExperienceItem({
 
     return (
         <Collapsible
-            className="group/exp relative after:absolute after:bottom-0 after:left-1/2 after:w-[84%] after:-translate-x-1/2 after:border-b after:border-border"
+            className="group/exp relative after:absolute after:bottom-0 after:left-1/2 after:w-[84%] after:-translate-x-1/2"
             defaultOpen={defaultOpen}
         >
             {" "}
