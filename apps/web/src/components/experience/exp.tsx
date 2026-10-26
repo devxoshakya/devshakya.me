@@ -218,11 +218,10 @@ export function Experiences() {
 function ExperienceList({ experiences }: { experiences: Experience[] }) {
     return (
         <>
-            {experiences.map((experience, index) => (
+            {experiences.map((experience) => (
                 <ExperienceItem
                     key={experience.id}
                     experience={experience}
-                    defaultOpen={index === 0}
                 />
             ))}
         </>
@@ -420,7 +419,7 @@ function buildRows({ roles }: Experience): Row[] {
                 kind: "branch",
                 content: (
                     <p className="text-sm leading-5">{role.description}</p>
-                )
+                ),
             });
         }
 

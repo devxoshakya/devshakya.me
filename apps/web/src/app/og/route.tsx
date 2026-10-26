@@ -15,7 +15,7 @@ const getGeistBold = async (request: Request) => {
 const getLogoSvg = async (request: Request) => {
     const res = await fetch(new URL("/favicon.svg", request.url));
     const svgText = await res.text();
-    const base64 = btoa(svgText);
+    const base64 = Buffer.from(svgText, "utf-8").toString("base64");
     return `data:image/svg+xml;base64,${base64}`;
 };
 
@@ -41,7 +41,7 @@ export const GET = async (request: Request) => {
                 {/* Top row: logo + optional pill */}
                 <div tw="flex items-start justify-between w-full">
                     {/* oxlint-disable-next-line next/no-img-element */}
-                    <img src={logoDataUri} alt="logo" tw="w-[60px] h-[60px]" />
+                    <img src={logoDataUri} alt="logo" tw="w-[120px] h-[120px]" />
 
                     {category && (
                         <div tw="flex items-center justify-center rounded-full bg-black/5 px-8 py-3">

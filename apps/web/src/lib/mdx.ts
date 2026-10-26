@@ -59,7 +59,7 @@ export async function getFileBySlug(type, slug) {
 export async function getAllFilesFrontMatter(type) {
     const files = fs.readdirSync(path.join(root, "data", type));
 
-    return files.reduce((allPosts, postSlug) => {
+    const posts = files.reduce((allPosts, postSlug) => {
         const source = fs.readFileSync(
             path.join(root, "data", type, postSlug),
             "utf8"
@@ -74,4 +74,8 @@ export async function getAllFilesFrontMatter(type) {
             ...allPosts,
         ];
     }, []);
+
+    return posts.sort(
+        (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
+    );
 }

@@ -21,7 +21,7 @@ export const LINK = {
   LICENSE: `${GITHUB_URL}/blob/${GITHUB.branch}/LICENSE`,
   LINKEDIN: "https://www.linkedin.com/in/devxoshakya",
   PEERLIST: "https://peerlist.io/devxoshakya",
-  RESUME: "/resume.pdf",
+  RESUME: "/resume",
   SHADCN_LABS: "https://shadcn-labs.com",
   SHADCN_UI: "https://ui.shadcn.com",
   TELEGRAM: "https://t.me/devxoshakya",
