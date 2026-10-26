@@ -20,14 +20,6 @@ const WebsiteJsonLd = () => {
     description: SITE.DESCRIPTION.SHORT,
     inLanguage: "en-US",
     name: SITE.NAME,
-    potentialAction: {
-      "@type": "SearchAction",
-      "query-input": "required name=search_term_string",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: absoluteUrl(`?search={search_term_string}`),
-      },
-    },
     url: SITE.URL,
   };
 
@@ -64,7 +56,7 @@ const FAQJsonLd = () => {
       question: "What are Dev's areas of expertise?",
     },
     {
-      answer: `You can reach out to Aniket via his social profiles on LinkedIn and GitHub, or visit his website at ${SITE.URL}.`,
+      answer: `You can reach out to Dev via his social profiles on LinkedIn and GitHub, or visit his website at ${SITE.URL}.`,
       question: "How can I contact Dev?",
     },
     {
@@ -93,6 +85,47 @@ interface BreadcrumbItem {
   name: string;
   path: string;
 }
+
+interface BlogPostingJsonLdProps {
+  title: string;
+  description?: string;
+  url: string;
+  image?: string;
+  datePublished?: string;
+}
+
+const BlogPostingJsonLd = ({
+  title,
+  description,
+  url,
+  image,
+  datePublished,
+}: BlogPostingJsonLdProps) => {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    ...(description ? { description } : {}),
+    ...(image ? { image: [image] } : {}),
+    ...(datePublished ? { datePublished } : {}),
+    author: {
+      "@type": "Person",
+      name: SITE.AUTHOR.NAME,
+      url: SITE.URL,
+    },
+    headline: title,
+    inLanguage: "en-US",
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    name: title,
+    publisher: {
+      "@type": "Organization",
+      name: SITE.NAME,
+      url: SITE.URL,
+    },
+    url,
+  };
+
+  return <JsonLdScript data={jsonLd} />;
+};
 
 const normalizeBreadcrumbPath = (path: string): string => {
   if (path === ROUTES.HOME) {
@@ -123,12 +156,12 @@ const JsonLdScripts = () => (
   <>
     <WebsiteJsonLd />
     <OrganizationJsonLd />
-    <FAQJsonLd />
   </>
 );
 
 export {
   BreadcrumbJsonLd,
+  BlogPostingJsonLd,
   JsonLdScripts,
   WebsiteJsonLd,
   OrganizationJsonLd,

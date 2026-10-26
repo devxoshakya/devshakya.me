@@ -5,11 +5,12 @@ import { ProjectSection } from "@/components/project/section";
 import { WritingSection } from "@/components/blog/writing-section";
 import { SoftwareSection } from "@/components/uses/software-section";
 import { ROUTES } from "@/constants/routes";
-import { BreadcrumbJsonLd } from "@/seo/json-id";
+import { FAQJsonLd, BreadcrumbJsonLd } from "@/seo/json-id";
 
 const MainView = () => (
   <>
     <BreadcrumbJsonLd items={[{ name: "Home", path: ROUTES.HOME }]} />
+    <FAQJsonLd />
     <AboutSection />
     <Experiences/>
     <ProjectSection />

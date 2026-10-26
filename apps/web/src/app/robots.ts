@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
             allow: "/",
+            disallow: ["/upload"],
             userAgent: "*",
         },
         sitemap: absoluteUrl("/sitemap.xml"),
