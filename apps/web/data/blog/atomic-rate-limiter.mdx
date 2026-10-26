@@ -2,8 +2,14 @@
 title: "Building an atomic rate limiter with Redis, Lua and FastAPI"
 publishedAt: "2026-10-16"
 summary: "A per-key token bucket in one atomic Redis call, with IPv6 /64 bucketing, fail-open vs fail-closed modes, and a login limiter for an app that has no usernames."
-image: "/static/images/atomic-rate-limiter/cover.png"
+image: "https://cdn2.devxoshakya.xyz/blog/ratelimit.png"
 ---
+
+<Image
+  src="https://cdn2.devxoshakya.xyz/blog/ratelimit.png"
+  width={1000}
+  height={650}
+/>
 
 My portfolio backend has public endpoints (visitor counter, pin board), a password login, a passkey login and a few admin routes. All of them need rate limiting, and each one needs a different kind of rate limiting. This post covers the limiter I built for all of them, the bugs I avoided on purpose, and the one design decision that surprised me: how to rate-limit a login that has no username.
 

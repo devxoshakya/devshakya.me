@@ -2,8 +2,14 @@
 title: "Refresh token rotation with reuse detection, done properly"
 publishedAt: "2026-10-20"
 summary: "Short-lived access JWTs, rotating refresh tokens in token families, theft detection, a multi-tab grace window, and a Redis blacklist that keeps JWTs useful."
-image: "/static/images/refresh-token-rotation/cover.png"
+image: "https://cdn2.devxoshakya.xyz/blog/token.png"
 ---
+
+<Image
+  src="https://cdn2.devxoshakya.xyz/blog/token.png"
+  width={1000}
+  height={650}
+/>
 
 Most tutorials stop at "issue a JWT, set it to expire in a day." That is fine for a demo and weak for a real admin panel. If the token leaks, the attacker has a full day, and you cannot cancel it.
 

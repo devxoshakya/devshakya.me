@@ -2,8 +2,14 @@
 title: "Direct-to-R2 image uploads with presigned URLs and magic-byte validation"
 publishedAt: "2026-10-19"
 summary: "How to upload images straight to Cloudflare R2 from the browser, keep a ticket in Redis, verify files by their real bytes, and think through every failure order."
-image: "/static/images/r2-presigned-uploads/cover.png"
+image: "https://cdn2.devxoshakya.xyz/blog/presigned.png"
 ---
+
+<Image
+  src="https://cdn2.devxoshakya.xyz/blog/presigned.png"
+  width={1000}
+  height={650}
+/>
 
 My pin board lets me upload images through an admin panel. On Vercel serverless, sending the image through the API is a bad idea: request bodies are capped at around 4.5 MB (check the current docs), and you pay function time while a large file streams through.
 

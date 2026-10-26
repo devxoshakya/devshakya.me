@@ -2,8 +2,14 @@
 title: "Stale-while-revalidate without a worker: caching WakaTime on serverless"
 publishedAt: "2026-10-26"
 summary: "How to cache a slow third-party API in Redis with a stampede lock, serve stale data safely, and compute 'is active' at read time so old data never lies."
-image: "/static/images/wakatime-swr-cache/cover.png"
+image: "https://cdn2.devxoshakya.xyz/blog/wakatime.png"
 ---
+
+<Image
+  src="https://cdn2.devxoshakya.xyz/blog/wakatime.png"
+  width={1000}
+  height={650}
+/>
 
 My portfolio shows whether I am coding right now and how many hours I have logged in total. The data comes from WakaTime. Calling their API on every page view is slow, wasteful, and a good way to hit their rate limits.
 
