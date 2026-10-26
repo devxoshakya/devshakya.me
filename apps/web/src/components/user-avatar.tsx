@@ -2,7 +2,6 @@
 
 import type { Transition } from "motion/react";
 import { motion } from "motion/react";
-import Image from "next/image";
 
 import { SITE } from "@/constants/site";
 
@@ -23,13 +22,13 @@ export const UserAvatar = ({
     style={{ height: size, width: size }}
     transition={{ layout: layoutTransition }}
   >
-    <Image
+    <img
       src={SITE.AUTHOR.AVATAR}
       alt="Portrait of Dev Shakya"
       width={size}
       height={size}
       className="size-full rounded-full object-cover"
-      priority
+      fetchPriority="high"
     />
   </motion.div>
 );

@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import NextImage from "next/image";
 
 import StepLarge from "@/components/step-large";
 import StepLargeCustom from "@/components/step-large-custom";
@@ -15,13 +14,9 @@ import Button from "./button";
 
 const TweetEmbed = () => null;
 
-const MdxImage = ({ width, height, alt = "", ...props }) => {
-    if (width && height) {
-        return <NextImage width={width} height={height} alt={alt} {...props} />;
-    }
-
-    return <img alt={alt} loading="lazy" {...props} />;
-};
+const MdxImage = ({ width, height, alt = "", ...props }) => (
+    <img width={width} height={height} alt={alt} loading="lazy" {...props} />
+);
 
 const CustomLink = (props) => {
     const href = props.href;

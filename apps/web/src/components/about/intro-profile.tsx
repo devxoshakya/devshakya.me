@@ -7,7 +7,6 @@ import {
     motion,
     useReducedMotion,
 } from "motion/react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { FlipRoles } from "@/components/about/flip-roles";
@@ -403,14 +402,14 @@ const IntroProfile = ({ mode, onComplete }: IntroProfileProps) => {
                     ) : null}
 
                     {shouldPlayIntro && visiblePhase !== "profile" ? (
-                        <Image
+                        <img
                             src={SITE.AUTHOR.AVATAR}
                             alt=""
                             width={60}
                             height={60}
                             aria-hidden="true"
                             className="pointer-events-none fixed size-px opacity-0"
-                            priority
+                            fetchPriority="high"
                         />
                     ) : null}
 

@@ -9,7 +9,7 @@ const baseUrl = getBaseUrl();
 export const SITE = {
     AUTHOR: {
         AVATAR: USER.avatar,
-        FREELANCE_AVATAR: "/freelance-guy.jpeg",
+        FREELANCE_AVATAR: "https://cdn2.devxoshakya.xyz/folio/1763300070977.jpeg",
         NAME,
         TWITTER: "@devxoshakya",
     },

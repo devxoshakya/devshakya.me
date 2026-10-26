@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { cn } from "@/lib/utils";
 import type { ProjectSourceOption } from "@/types/projects";
 
@@ -14,7 +12,7 @@ const ProjectSourceLabel = ({ source, className }: ProjectSourceLabelProps) => {
   return (
     <span className={cn("inline-flex items-center gap-1.5", className)}>
       {source.image ? (
-        <Image
+        <img
           alt={source.label}
           className="size-4 shrink-0 rounded-full object-cover"
           height={16}

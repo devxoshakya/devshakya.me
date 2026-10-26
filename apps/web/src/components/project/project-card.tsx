@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import React, { Suspense } from "react";
 import { ArrowRight } from "lucide-react";
@@ -80,7 +79,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                             {videoSrc ? (
                                 <Suspense
                                     fallback={
-                                        <Image
+                                        <img
                                             width={1536}
                                             height={1000}
                                             alt={`${title} project image`}
@@ -96,7 +95,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                                     />
                                 </Suspense>
                             ) : (
-                                <Image
+                                <img
                                     width={1536}
                                     height={1000}
                                     alt={`${title} project image`}

@@ -18,12 +18,9 @@ export const metadata = createMetadata({
     category: "about",
 });
 
-const p1 =
-    "https://www.devxoshakya.xyz/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Favatar.9dd296fc.png&w=640&q=75";
-const p2 =
-    "https://www.devxoshakya.xyz/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhack.91bce6ff.jpg&w=640&q=75";
-const p3 =
-    "https://www.devxoshakya.xyz/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fpeace.91a94b8d.jpg&w=640&q=75";
+const p1 = "https://cdn2.devxoshakya.xyz/folio/me.webp";
+const p2 = "https://cdn2.devxoshakya.xyz/folio/card.webp";
+const p3 = "https://cdn2.devxoshakya.xyz/folio/tree.webp";
 
 const birthDate = new Date(2004, 11, 20);
 const today = new Date();

@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import type { FC } from "react";
 import { motion } from "motion/react";
 
@@ -32,14 +31,14 @@ const PolaroidPhoto: FC<PolaroidPhotoProps> = ({
             transition={{ duration: 0.3, ease: "linear" }}
             className="polaroid group h-50 w-40 rounded-[1px] bg-white p-2 shadow-md transition-all duration-200 hover:scale-105 dark:shadow-md dark:shadow-emerald-900"
         >
-            <Image
+            <img
                 width={300}
                 height={250}
                 alt={altText}
                 src={imageSrc}
                 className="size-40 object-cover grayscale transition-all delay-150 duration-300 group-hover:grayscale-0"
                 loading="eager"
-                priority
+                fetchPriority="high"
             />
             {text && (
                 <p
