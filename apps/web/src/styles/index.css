@@ -187,6 +187,11 @@ html::-webkit-scrollbar,
   @apply animate-in fade-in slide-in-from-bottom-5 blur-in-md fill-mode-both duration-600;
 }
 
+.blog-prose table {
+  display: block;
+  overflow-x: auto;
+}
+
 .blog-prose .blog-code-block {
   overflow-x: auto;
   border: 1px solid var(--border);

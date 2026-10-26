@@ -1,0 +1,174 @@
+---
+title: "Building an atomic rate limiter with Redis, Lua and FastAPI"
+publishedAt: "2026-10-26"
+summary: "A per-key token bucket in one atomic Redis call, with IPv6 /64 bucketing, fail-open vs fail-closed modes, and a login limiter for an app that has no usernames."
+image: "/static/images/atomic-rate-limiter/cover.png"
+---
+
+My portfolio backend has public endpoints (visitor counter, pin board), a password login, a passkey login and a few admin routes. All of them need rate limiting, and each one needs a different kind of rate limiting. This post covers the limiter I built for all of them, the bugs I avoided on purpose, and the one design decision that surprised me: how to rate-limit a login that has no username.
+
+- Stack: FastAPI, Redis (Upstash), deployed on Vercel serverless
+- Result: 50 concurrent requests against a capacity-10 bucket let exactly 10 through
+
+## Why not a simple counter?
+
+The first version everyone writes is `INCR` plus `EXPIRE`. It has two problems:
+
+- **Fixed windows allow bursts.** A client can send 10 requests at 11:59:59 and 10 more at 12:00:00. That is 20 requests in two seconds against a "10 per minute" limit.
+- **It is not atomic.** If `INCR` succeeds and the process dies before `EXPIRE`, the key lives forever and the user is blocked forever.
+
+A **token bucket** fixes the burst problem. Each client has a bucket with a capacity (the burst size) and a refill rate (the sustained rate). Every request spends tokens. If there are not enough, the request is denied.
+
+## Why Lua
+
+A token bucket needs a read-modify-write: read the tokens, add the refill, subtract the cost, write back. If two requests do this at the same time from two serverless instances, both read the same value and both spend it. That is a race condition, and it means your limit is not really a limit.
+
+Redis runs a Lua script as a single atomic unit. No other command runs in the middle of it. So the whole algorithm goes into one script, and one network round trip does everything. On Upstash, where you are billed per command, one call per check also keeps the cost down.
+
+```lua
+-- KEYS[1] = bucket key
+-- ARGV[1] = capacity, ARGV[2] = refill per second, ARGV[3] = cost
+local t = redis.call('TIME')
+local now = tonumber(t[1]) + tonumber(t[2]) / 1000000
+
+local capacity = tonumber(ARGV[1])
+local rate = tonumber(ARGV[2])
+local cost = tonumber(ARGV[3])
+
+local data = redis.call('HMGET', KEYS[1], 'tokens', 'ts')
+local tokens = tonumber(data[1])
+local ts = tonumber(data[2])
+if tokens == nil then
+  tokens = capacity
+  ts = now
+end
+
+local elapsed = math.max(0, now - ts)
+tokens = math.min(capacity, tokens + elapsed * rate)
+
+local allowed = 0
+local retry_after = 0
+if tokens >= cost then
+  allowed = 1
+  tokens = tokens - cost
+else
+  retry_after = (cost - tokens) / rate
+end
+
+redis.call('HSET', KEYS[1], 'tokens', tostring(tokens), 'ts', tostring(now))
+redis.call('EXPIRE', KEYS[1], math.ceil(capacity / rate) + 60)
+
+return { allowed, tostring(tokens), tostring(retry_after) }
+```
+
+There are four details in this script that each caused a bug in my first draft.
+
+**1. Use Redis `TIME`, not your app's clock.** On serverless, every request may run on a different instance, and instance clocks drift apart. If instance A thinks it is 12:00:05 and instance B thinks it is 12:00:03, `elapsed` can go negative or jump forward. Redis has one clock. Use it. The `math.max(0, ...)` is a second line of defense.
+
+**2. Return numbers as strings.** Redis converts Lua numbers to integers when it sends them back. A `retry_after` of `2.7` becomes `2`, and `remaining` of `0.4` becomes `0`. Return strings and parse them in Python.
+
+**3. Store tokens as a string too.** This keeps float precision predictable when you read them back.
+
+**4. Always set a TTL.** Without `EXPIRE`, every IP that ever visits leaves a hash in Redis forever. The TTL is the time the bucket needs to refill completely, plus a buffer, because after that point the bucket is identical to a brand new one and can be deleted safely.
+
+## Calling it from Python
+
+Load the script once with `SCRIPT LOAD` and call it with `EVALSHA`, so you don't send the script text on every request. If Redis restarts, you get a `NOSCRIPT` error, so fall back to `EVAL`.
+
+```python
+async def consume(redis, group: str, identity: str, cost: float = 1.0) -> Decision:
+    cfg = LIMITS[group]
+    key = f"rl:{group}:{identity}"
+    try:
+        try:
+            raw = await redis.evalsha(SHA, 1, key, cfg.capacity, cfg.refill_per_sec, cost)
+        except NoScriptError:
+            raw = await redis.eval(LUA_SOURCE, 1, key, cfg.capacity, cfg.refill_per_sec, cost)
+    except RedisError:
+        if cfg.fail_closed:
+            raise ServiceUnavailable()
+        return Decision(allowed=True, remaining=cfg.capacity, retry_after=0)
+
+    allowed, remaining, retry_after = int(raw[0]), float(raw[1]), float(raw[2])
+    return Decision(bool(allowed), remaining, retry_after)
+```
+
+At startup, validate every group: `cost <= capacity`. If it isn't, that route can never succeed, and you want to find that out at boot, not in production.
+
+## Fail-open or fail-closed?
+
+When Redis is down, you have to choose what the limiter does. There is no right answer for the whole app, so I made it a property of each group.
+
+| Group                                  | Fail mode | Reason                                                                          |
+| -------------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| reads, visit, waka                     | open      | Blocking a public page because Redis is down is worse than a few extra requests |
+| login, refresh, passkey, upload, admin | closed    | Without a limiter, an attacker could guess passwords freely during an outage    |
+
+The consequence is that when Redis is down, the admin area is down too. I accept that, because those routes also check the token blacklist in Redis, so they could not run safely anyway.
+
+## IPv6: bucket on the /64, not the address
+
+A normal home connection with IPv6 gets a whole `/64` block, which is 2^64 addresses. If you key the bucket on the full address, an attacker just rotates addresses and gets a fresh bucket every time. So I normalize the identity first.
+
+```python
+import hashlib, hmac, ipaddress
+
+def bucket_identity(raw_ip: str, pepper: bytes) -> str:
+    ip = ipaddress.ip_address(raw_ip)
+    if ip.version == 6:
+        value = str(ipaddress.ip_network(f"{ip}/64", strict=False))
+    else:
+        value = str(ip)
+    return hmac.new(pepper, value.encode(), hashlib.sha256).hexdigest()[:32]
+```
+
+The HMAC also means raw IPs never touch Redis or the logs.
+
+Before you key anything on an IP, check that the IP is real. On Vercel, read the header the platform documents, then test it: deploy a preview and send `curl -H "X-Forwarded-For: 1.2.3.4"`. See what your code receives. Whether the platform overwrites or appends the header is something to confirm by experiment, not assume.
+
+## The interesting part: rate-limiting a login with no username
+
+My admin login has no username. There is one admin, so the form is just a password field. That removes the usual defense, a bucket per username, because there is no username to key on.
+
+What I did instead is use two buckets:
+
+- **`login` (per IP):** 5 capacity, one token back every 3 minutes. Charged on every attempt.
+- **`login_global` (one shared key):** 10 capacity, one token back every 5 minutes. **Charged only on failed attempts.**
+
+The flow looks like this:
+
+1. **Peek** at `login_global` with cost 0. If it is empty, return 429 immediately.
+2. Check the password.
+3. If it was wrong, **consume** one token from `login_global`.
+
+That is why the limiter has a peek mode. Peek is just a call with `cost = 0`: it refills and reports, and spends nothing.
+
+The global bucket stops a distributed attack. A thousand IPs each trying twice still drain one shared bucket. The price is that an attacker can drain the bucket on purpose and lock **me** out of password login for a while. That is a denial of service, and I chose it knowingly. Passkey login has its own bucket, so I can still get in. This is also why the passkey is meant to be the daily login, and the password is the fallback.
+
+## Testing it properly
+
+Do not test this against a fake Redis. Fake Redis implementations often do not run Lua faithfully, so a test can pass while the real script is broken. Use a real Redis in docker-compose or in CI service containers.
+
+The test that matters:
+
+```python
+@pytest.mark.asyncio
+async def test_exactly_capacity_allowed(redis):
+    # capacity 10, near-zero refill so timing cannot add tokens mid-test
+    results = await asyncio.gather(
+        *[consume(redis, "test_burst", "same-identity") for _ in range(50)]
+    )
+    assert sum(r.allowed for r in results) == 10
+```
+
+Other tests worth writing: refill math (use a high refill rate and a short sleep, since you cannot fake Redis `TIME`), key TTL is set, two IPv6 addresses in the same `/64` share a bucket, fail-open groups pass when Redis is stopped, and `login_global` does not move on a successful login.
+
+## What I would tell past me
+
+- Put the whole read-modify-write in one Lua script, or it is not a rate limiter.
+- Use the Redis clock.
+- Return strings from Lua when you need decimals.
+- Decide fail-open or fail-closed per route, not once for the app.
+- Bucket IPv6 by `/64`.
+- Always set a TTL.
+- Measure your own numbers and put them in the post: TODO add your concurrency test output and the per-check latency from your Vercel region.

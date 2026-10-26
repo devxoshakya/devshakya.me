@@ -1,0 +1,126 @@
+---
+title: "Stale-while-revalidate without a worker: caching WakaTime on serverless"
+publishedAt: "2026-10-26"
+summary: "How to cache a slow third-party API in Redis with a stampede lock, serve stale data safely, and compute 'is active' at read time so old data never lies."
+image: "/static/images/wakatime-swr-cache/cover.png"
+---
+
+My portfolio shows whether I am coding right now and how many hours I have logged in total. The data comes from WakaTime. Calling their API on every page view is slow, wasteful, and a good way to hit their rate limits.
+
+Normally you would solve this with a background worker that refreshes a cache. On Vercel serverless there is no worker, and nothing can run after the response is sent. This post shows how to get stale-while-revalidate behavior using only Redis and the request itself.
+
+- Stack: FastAPI, `httpx`, Redis
+- Result: 100 concurrent requests cause exactly 1 upstream fetch
+
+## What the endpoint returns
+
+```json
+{ "is_active": true, "total_seconds": 1234567 }
+```
+
+That is all. The backend keeps no history. Anything fancier is the frontend's job.
+
+## The three problems
+
+1. **Latency and quota:** the upstream API is slow and rate limited.
+2. **Stampede:** when the cache expires, 100 simultaneous visitors would all trigger a refresh.
+3. **Lying data:** if you cache `is_active: true` and serve it an hour later, the site says I am coding when I am asleep.
+
+## Two cache keys
+
+| Key          | TTL              | Purpose                                        |
+| ------------ | ---------------- | ---------------------------------------------- |
+| `waka:fresh` | about 5 minutes  | Normal fast path                               |
+| `waka:stale` | 24 hours or more | Last known good data, used when upstream fails |
+
+Both hold the same payload: `total_seconds`, `last_activity_at` and `fetched_at`. Note what is **not** in there: no `is_active` boolean. I will come back to that.
+
+## The request flow
+
+```
+1. waka:fresh hit?            -> serve it
+2. miss -> try waka:lock (SET NX EX 10)
+     got the lock  -> fetch upstream, update fresh + stale, serve, release lock
+     lock is taken -> serve waka:stale with stale: true   (no fetch!)
+3. fetch failed and stale exists -> serve stale
+   fetch failed and no stale     -> 503 in the standard error envelope
+```
+
+The lock is what prevents the stampede. Only the request that wins `SET NX` calls WakaTime. Everyone else gets the stale copy instantly. Nobody waits.
+
+## Releasing the lock safely
+
+A common bug: request A takes the lock with a 10 second expiry, but the upstream call is slow and takes 12 seconds. The lock expires at 10. Request B takes it. Then A finishes and calls `DEL waka:lock`, which deletes **B's** lock. Now a third request can fetch too.
+
+The fix is to store a unique token as the lock value and release it with a Lua script that only deletes when the value matches.
+
+```python
+RELEASE = """
+if redis.call('GET', KEYS[1]) == ARGV[1] then
+  return redis.call('DEL', KEYS[1])
+end
+return 0
+"""
+
+token = uuid4().hex
+got = await redis.set("waka:lock", token, nx=True, ex=10)
+...
+await redis.eval(RELEASE, 1, "waka:lock", token)
+```
+
+Again, this has to be Lua. A separate `GET` then `DEL` is a race.
+
+## Compute `is_active` at request time
+
+This is the part I like most. Do not cache a boolean. Cache `last_activity_at`, and compute the answer when you serve it:
+
+```python
+is_active = (now - last_activity_at) <= timedelta(minutes=ACTIVE_WINDOW_MIN)
+```
+
+Why it matters: suppose the cache holds data from 11:50 and WakaTime is down, so you serve stale data at 14:00. If you had stored `is_active = true`, the site would say I am coding for the next day. With the timestamp, the same stale payload correctly produces `false` as soon as the window passes. The data can be old, but it cannot lie about the present.
+
+## Getting the upstream data right
+
+- **Auth:** HTTP Basic with the API key, from an environment variable. Validate it exists at startup.
+- **`total_seconds`:** use the all-time endpoint. It can return **HTTP 202**, which means "still computing", not an error. Treat it as "no new data yet" and fall back to stale.
+- **`is_active`:** derive `last_activity_at` from today's durations (or heartbeats). "Today" depends on timezone, so always pass the timezone parameter explicitly, or your day boundary will be wrong around midnight.
+- Verify exact endpoint paths and field names in the WakaTime docs, since they change.
+- Run both upstream calls in parallel with `asyncio.gather`.
+
+## Resilience on serverless
+
+Every second spent waiting is billed and counts against the function's maximum duration, so be strict:
+
+- **Timeouts:** connect 2 to 3 seconds, read about 5 seconds. Make them shorter when you already have stale data to fall back on.
+- **Retries:** only on timeouts, 5xx and 429, at most 2, with **jittered exponential backoff**. Retries eat your time budget, so keep them few.
+- **Upstream limiter:** put a global rate limit in front of the WakaTime calls themselves, so a bug on your side cannot burn their quota.
+- **Clients:** create the `httpx.AsyncClient` in the app lifespan, not per request.
+
+## Tests that prove it works
+
+```python
+@pytest.mark.asyncio
+async def test_stampede(client, respx_mock):
+    route = respx_mock.get(WAKA_URL).mock(return_value=slow_ok_response(delay=0.5))
+    await flush_cache()
+    responses = await asyncio.gather(*[client.get("/api/v1/stats/coding") for _ in range(100)])
+    assert all(r.status_code == 200 for r in responses)
+    assert route.call_count == 1
+```
+
+More cases:
+
+- Upstream blocked: stale data is served and `stale: true` appears
+- `is_active` flips to `false` as time passes, using an injectable clock
+- A 202 response is handled without an error
+- No fresh, no stale, upstream down: clean `503` envelope
+- Timeouts and retry behavior with `respx`
+
+## Takeaways
+
+- You can get stale-while-revalidate with no worker: a lock decides who refreshes, everyone else reads stale.
+- Release locks with a token check in Lua, or a slow holder deletes someone else's lock.
+- Cache facts (timestamps), not conclusions (booleans), when the conclusion depends on the current time.
+- Treat 202 and timeouts as normal states, not errors.
+- Add your own numbers: TODO add cold-cache latency, warm-cache latency, and your concurrency test output.

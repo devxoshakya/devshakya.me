@@ -1,0 +1,126 @@
+---
+title: "Direct-to-R2 image uploads with presigned URLs and magic-byte validation"
+publishedAt: "2026-10-26"
+summary: "How to upload images straight to Cloudflare R2 from the browser, keep a ticket in Redis, verify files by their real bytes, and think through every failure order."
+image: "/static/images/r2-presigned-uploads/cover.png"
+---
+
+My pin board lets me upload images through an admin panel. On Vercel serverless, sending the image through the API is a bad idea: request bodies are capped at around 4.5 MB (check the current docs), and you pay function time while a large file streams through.
+
+So the browser uploads directly to Cloudflare R2, and the API only issues permission and verifies the result. This post covers the three-step flow and the part most tutorials skip: the file the browser uploads is untrusted, so the server must check it after the fact.
+
+- Stack: FastAPI, Cloudflare R2 (S3 API), Redis, PostgreSQL
+- Rejected in tests: a renamed `.exe` as `.jpg`, oversized files, wrong content type, expired tickets
+
+## The flow
+
+```
+1. POST /admin/pins/upload-url   -> returns pin_id + presigned PUT URL
+2. Browser PUTs the file straight to R2
+3. POST /admin/pins/{id}/confirm -> server verifies, then creates the DB row
+```
+
+## Why a Redis ticket and not a "pending" database row
+
+The usual design inserts a `pins` row with `status = pending`, then flips it to `published`. That brings a status column, orphaned pending rows when users abandon uploads, and a cleanup job.
+
+I store a **ticket in Redis** instead: `pin:upload:{pin_id}` with the expected `mime`, `bytes`, object `key`, and extension, and a TTL of about 15 minutes. If the upload never completes, the ticket expires on its own. The `pins` table then only ever contains published pins, so there is no status column and no pending state to clean.
+
+## Step 1: issue the upload URL
+
+Validate the request first:
+
+- MIME type must be in an allow-list (JPEG, PNG, WebP, optionally AVIF)
+- `bytes` must be at most your maximum (for example 10 MB)
+
+Then generate a UUIDv7 `pin_id`, build a key like `pending/{pin_id}.jpg`, store the ticket, and presign a PUT with a short expiry (5 to 10 minutes). Sign the `Content-Type` header, and try to sign `Content-Length` too.
+
+Be careful here: R2 may not enforce every signed header the way S3 does, so test it yourself. **Do not rely on the signature to enforce size.** The real guarantee is the HEAD check in step 3.
+
+R2 specifics that cost me time:
+
+- Presigned URLs only work on the S3 endpoint (`https://<account_id>.r2.cloudflarestorage.com`, region `auto`). They do not work on your custom public domain.
+- R2 does not support presigned POST policies, which is the S3 feature that would enforce size and type at upload time. That is why validation has to live in the confirm step.
+- The bucket needs a CORS rule allowing `PUT` from your admin origin and the `Content-Type` header.
+
+## Step 3: confirm, where the real security lives
+
+The client claims "I uploaded it." The server does not believe that. In order:
+
+1. **Load the ticket.** Missing means expired, so return a clear error.
+2. **Take a lock:** `SET pin:confirm:{id} NX` with a short TTL, so a double-click cannot run two confirms at once.
+3. **HEAD the object.** It must exist, `ContentLength` must equal `ticket.bytes` and be within the maximum, and `ContentType` must equal `ticket.mime`.
+4. **Read the first bytes.** Do a ranged GET of about 32 bytes and compare against known file signatures.
+
+| Format | Signature                                       |
+| ------ | ----------------------------------------------- |
+| JPEG   | `FF D8 FF`                                      |
+| PNG    | `89 50 4E 47 0D 0A 1A 0A`                       |
+| WebP   | `RIFF` + 4 size bytes + `WEBP`                  |
+| AVIF   | bytes 4 to 8 are `ftyp`, brand `avif` or `avis` |
+
+```python
+def sniff(head: bytes) -> str | None:
+    if head.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if head.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return "image/webp"
+    if head[4:8] == b"ftyp" and head[8:12] in (b"avif", b"avis"):
+        return "image/avif"
+    return None
+```
+
+The detected type must match the ticket. This is what rejects a renamed `.exe`: its `Content-Type` header says `image/jpeg` because the client said so, but its first bytes say `MZ`.
+
+A caveat worth stating honestly: magic bytes prove the file starts like an image, not that the whole file is harmless. I do not decode images on the server (no Pillow), and the images are served from a separate domain with `nosniff`, which limits the risk.
+
+5. **Promote the object.** Copy `pending/{pin_id}.ext` to `pins/{pin_id}/original.ext`, insert the database row (using `pin_id` as the primary key), delete the pending object, delete the ticket.
+6. **On any check failure:** delete the pending object and the ticket, and return `422` with the reason.
+
+## Make confirm idempotent
+
+If the pin row already exists, return it. Retries after a network failure then do no harm, and the primary key on `pin_id` is the final safety net against duplicates.
+
+## Thinking through failure order
+
+The order of operations decides what a crash leaves behind:
+
+| Failure                                        | What remains                 | Is it a problem?                                  |
+| ---------------------------------------------- | ---------------------------- | ------------------------------------------------- |
+| Copy succeeded, DB insert failed               | An orphan in `pins/`         | Harmless storage leak, found by the reconcile CLI |
+| DB insert succeeded, pending delete failed     | A stale object in `pending/` | A lifecycle rule deletes it after 1 day           |
+| Delete: object removed first, DB delete failed | Row pointing at nothing      | Broken images, **bad**                            |
+
+So for deletes I remove the **database row first**, then the object (best effort). A leftover object is invisible to users. A leftover row is a broken image on the live site.
+
+## Cleanup without a cron job
+
+- **R2 lifecycle rule:** expire the `pending/` prefix after 1 day, and abort incomplete multipart uploads.
+- **`reconcile-r2` CLI:** lists the `pins/` prefix, diffs it against `object_key` in the database, reports orphans, and deletes them with `--delete`.
+
+## Details that make it production-ready
+
+- Store only `object_key` in the database. Build the public URL as `R2_PUBLIC_BASE_URL + key` at response time, so changing your CDN domain never touches data.
+- Set `Cache-Control: public, max-age=31536000, immutable` on final objects. The key contains the unique id, so it never changes.
+- boto3 is synchronous. Presigning is local computation and is fine, but HEAD, GET, copy and delete are network calls, so run them in a threadpool or use `aioboto3`.
+- Validate `link_url` as `http` or `https` only, and cap the length of `title`, `caption` and `alt_text`. Make `alt_text` required, and enforce it in the schema with a `CHECK (length(trim(alt_text)) > 0)`.
+
+## Tests
+
+- Renamed executable with a `.jpg` name is rejected
+- Size mismatch between ticket and object is rejected
+- Wrong `Content-Type` is rejected
+- Expired ticket gives a clear error
+- Confirming twice returns the same pin
+- Two concurrent confirms produce one row
+- Hard delete removes both the row and the object
+
+## Takeaways
+
+- Never send file bytes through a serverless function if you can avoid it.
+- A signed URL is permission to upload, not proof of what was uploaded. Verify after.
+- Put short-lived state in Redis with a TTL instead of adding status columns.
+- Choose operation order by what each failure leaves behind.
+- Add your own measurements: TODO add upload timings for a 5 MB file and your confirm-step latency.

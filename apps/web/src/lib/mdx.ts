@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import path from "path";
 import readingTime from "reading-time";
 import rehypePrettyCode from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import { serialize } from "next-mdx-remote/serialize";
 
 const root = process.cwd();
@@ -25,6 +26,7 @@ export async function getFileBySlug(type, slug) {
     try {
         mdxSource = await serialize(normalizedContent, {
             mdxOptions: {
+                remarkPlugins: [remarkGfm],
                 rehypePlugins: [
                     [
                         rehypePrettyCode,

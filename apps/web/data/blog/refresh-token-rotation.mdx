@@ -1,0 +1,154 @@
+---
+title: "Refresh token rotation with reuse detection, done properly"
+publishedAt: "2026-10-26"
+summary: "Short-lived access JWTs, rotating refresh tokens in token families, theft detection, a multi-tab grace window, and a Redis blacklist that keeps JWTs useful."
+image: "/static/images/refresh-token-rotation/cover.png"
+---
+
+Most tutorials stop at "issue a JWT, set it to expire in a day." That is fine for a demo and weak for a real admin panel. If the token leaks, the attacker has a full day, and you cannot cancel it.
+
+This post covers the session design I built for the admin side of my portfolio API: a short-lived access token, a rotating refresh token, theft detection, and a small Redis blacklist so logout actually means something.
+
+- Stack: FastAPI, PostgreSQL, Redis, `ES256` JWTs
+- Single admin, two login methods (password and passkey), both produce the same token pair
+
+## The shape of the system
+
+| Token         | Lifetime                   | Stored where                      | Sent how                       |
+| ------------- | -------------------------- | --------------------------------- | ------------------------------ |
+| Access JWT    | 5 to 15 minutes            | Frontend memory only              | `Authorization: Bearer` header |
+| Refresh token | Days, with an absolute cap | HttpOnly cookie, hash in Postgres | Cookie, only to `/api/v1/auth` |
+
+The access token is short, so a leak is a small problem. The refresh token is long-lived, so it is the valuable one, and most of this post is about protecting it.
+
+On page reload the frontend has no access token (it lived in memory), so it calls `/auth/refresh`. The cookie goes along automatically, and a new access token comes back.
+
+## Access token details
+
+Claims: `sub`, `jti`, `iat`, `exp`, `typ=access`, `amr` (how the user logged in: `pwd` or `webauthn`), and `fid` (the refresh family id, explained below).
+
+When verifying:
+
+- **Use an algorithm allow-list.** Never read the algorithm from the token header. That is the old `alg: none` and algorithm-confusion attack class.
+- **Check `typ`.** A refresh or enrollment token must never be accepted as an access token.
+- Allow a few seconds of leeway on `exp` and `iat` for clock skew.
+- Put a `kid` in the header so you can rotate signing keys later.
+
+## Refresh tokens are not JWTs
+
+The refresh token is 32 random bytes, base64url encoded. It carries no data. In the database I store only `sha256(token)`.
+
+A fast hash is fine here. Slow hashes like Argon2 exist to protect low-entropy secrets such as passwords. A 256-bit random value cannot be brute-forced, so SHA-256 is enough, and it keeps refresh cheap.
+
+The table:
+
+```
+refresh_tokens
+  jti                pk
+  family_id          indexed
+  family_started_at
+  token_hash         unique
+  issued_at, expires_at
+  used_at, revoked_at
+  replaced_by
+  auth_method
+```
+
+The cookie: `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`. The narrow `Path` means the browser only sends it to auth routes, not to every request. One small catch: the `__Host-` cookie prefix requires `Path=/`, which conflicts with the narrow path, so use `__Secure-` instead.
+
+## Rotation: every refresh burns the old token
+
+Each time the client refreshes:
+
+1. Hash the cookie value and look it up.
+2. If it is valid and unused: mark it `used_at = now`, create a new token **in the same family**, and link them with `replaced_by`.
+3. Return a new access token and set the new cookie.
+
+A **family** is one login session and everything that descends from it. Rotation gives you something powerful: a refresh token can be used **exactly once**. So if a used token shows up again, one of two parties is holding a stale copy, and one of them is not you.
+
+## Reuse detection
+
+When an already-used token is presented:
+
+1. Revoke the entire family (`revoked_at` on every row with that `family_id`).
+2. Set `rt:fam:revoked:{fid}` in Redis.
+3. Clear the cookie and return 401.
+
+Both the attacker and the real user lose the session, and the real user logs in again. That is the point. A stolen token has become worthless the moment either side uses it.
+
+## The multi-tab race
+
+This is the bug that makes naive reuse detection unusable. You have two tabs open. Both notice the access token is about to expire and both call `/auth/refresh` at the same moment, with the same cookie.
+
+Tab A wins and rotates the token. Tab B arrives a few milliseconds later with the old token, and now it looks exactly like theft. You just logged out a legitimate user.
+
+The fix is a **grace window**. If a used token is presented again within 10 to 30 seconds of its `used_at`, don't revoke the family. Return an error (or the already-issued successor) and let the client retry. After the window, reuse is treated as theft.
+
+```python
+GRACE = timedelta(seconds=20)
+
+if token.used_at is not None:
+    if now - token.used_at <= GRACE:
+        raise Unauthorized("refresh_in_progress")   # client retries with the new cookie
+    await revoke_family(token.family_id)
+    raise Unauthorized("token_reuse_detected")
+```
+
+On the frontend, also serialize refresh calls with a single in-flight promise, so one tab does not fire the same request twice.
+
+## An absolute session cap
+
+Rotation has a side effect: each refresh pushes the expiry forward, so a session can live forever. To prevent that, every token carries `family_started_at`, and refresh is refused when `now - family_started_at` exceeds your cap (I use 30 days). Past that, the user has to log in again no matter how active the session is.
+
+## The Redis blacklist
+
+Pure stateless JWTs cannot be revoked. For an admin panel I want logout to be immediate, so I keep a small blacklist:
+
+- `jwt:bl:{jti}` with a **TTL equal to the token's remaining lifetime**. After the token would have expired anyway, the key disappears, so the list never grows.
+- `rt:fam:revoked:{fid}`, so that revoking a family also kills its access tokens straight away.
+
+On every authenticated request, check both keys in **one pipelined round trip**:
+
+```python
+async with redis.pipeline(transaction=False) as pipe:
+    pipe.exists(f"jwt:bl:{claims.jti}")
+    pipe.exists(f"rt:fam:revoked:{claims.fid}")
+    blacklisted, family_revoked = await pipe.execute()
+```
+
+This is an honest trade-off: the JWT is no longer fully stateless, because every request touches Redis. Short expiry plus a selective blacklist is a sensible middle. If Redis is down, I fail closed on admin routes.
+
+## Logout
+
+Logout has to work even if the access token already expired. So:
+
+1. If an access token is present, blacklist its `jti`.
+2. Find the family from the **refresh cookie**, and revoke it.
+3. Clear the cookie.
+
+The CLI commands `reset-password` and `revoke-sessions` revoke all refresh tokens. Access tokens already issued will keep working until they expire, which is at most a few minutes. I accept that and document it.
+
+## Housekeeping without a cron job
+
+Serverless has no background workers, so there is no cleanup job. With a single admin the table stays tiny, so I do a **lazy purge**: on each login and refresh, delete rows that are past their expiry.
+
+## Tests I would not skip
+
+- Expired token, wrong `typ`, tampered signature
+- Blacklisted `jti` is rejected
+- Access token from a revoked family is rejected
+- Replaying an old refresh token revokes the whole family
+- A replay inside the grace window does not
+- The absolute cap is enforced
+- Logout works with an expired access token
+- Two concurrent refreshes with the same cookie never produce two valid successors
+
+That last one needs a real Postgres and a row lock (`SELECT ... FOR UPDATE` on the token row), otherwise two requests can both see `used_at IS NULL`.
+
+## Takeaways
+
+- Refresh tokens should be single-use, and families make theft detectable.
+- The grace window is not optional. Without it, multiple tabs log you out.
+- Add an absolute cap, or rotation makes sessions immortal.
+- A small TTL-bound blacklist gives you real logout at almost no cost.
+- Measure and share real numbers in the post: TODO add the refresh latency from your Vercel region and the output of your concurrent-refresh test.
